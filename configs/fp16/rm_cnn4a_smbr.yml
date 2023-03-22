@@ -1,0 +1,29 @@
+models:
+    - name: rm_cnn4a_smbr
+      launchers:
+        - framework: dlsdk
+          adapter:
+            type: kaldi_latgen_faster_mapped
+            words_file: rm_cnn4a/words.txt
+            fst_file: rm_cnn4a/HCLG.fst
+            transition_model_file: rm_cnn4a/final.mdl
+            beam: 30
+            lattice_beam: 18
+            acoustic_score: 0.1
+            allow_partial: True
+            min_active: 200
+            max_active: 7000
+            inverse_acoustic_scale: 6.0
+          reset_memory_state: true
+          device_config:
+            GNA:
+              GNA_SCALE_FACTOR: "3075.15"
+      datasets:
+          - name: kaldi_rm_cnn4a_feats
+            metrics:
+                - type: wer
+                  abs_threshold: 0.14
+                  rel_threshold: 0.00001
+                - type: ser
+                  rel_threshold: 0.00001
+

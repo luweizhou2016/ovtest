@@ -1,0 +1,11 @@
+models:
+- name: emotions-recognition-retail-0003
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: AffectNet
+
+    metrics:
+    - type: accuracy
+      reference: 0.702

@@ -1,0 +1,27 @@
+models:
+- name: xcit-nano-12-p16
+  launchers:
+    - framework: dlsdk
+      adapter: classification
+  datasets:
+    - name: ImageNet2012
+      reader: pillow_imread
+      preprocessing:
+        - type: resize
+          size: 224
+          interpolation: BICUBIC
+          aspect_ratio_scale: greater
+          use_pillow: True
+        - type: crop
+          size: 224
+          use_pillow: True
+        - type: rgb_to_bgr
+      metrics:
+        - name: accuracy@top1
+          type: accuracy
+          top_k: 1
+          reference: 0.6996
+        - name: accuracy@top5
+          type: accuracy
+          top_k: 5
+          reference: 0.89764

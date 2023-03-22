@@ -1,0 +1,25 @@
+models:
+- name: retinanet_resnet34
+  launchers:
+  - framework: dlsdk
+    adapter:
+      type: retinanet
+      loc_out: regr_out
+      class_out: class_out
+  datasets:
+  - name: VOC_like_Tianchi
+    preprocessing:
+    - type: resize
+      size: 800
+    postprocessing:
+    - type: resize_prediction_boxes
+    - type: clip_boxes
+      size: 800
+      apply_to: prediction
+    - type: nms
+    metrics:
+    - type: map
+      integral: 11point
+      ignore_difficult: true
+      presenter: print_scalar
+      reference: 0.9028

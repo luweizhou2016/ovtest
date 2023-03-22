@@ -1,0 +1,24 @@
+models:
+  - name: tiramisu-fc-densenet-103
+    launchers:
+    - framework: dlsdk
+      adapter:
+          type: segmentation
+          make_argmax: True
+    datasets:
+    - name: CamVid_32cl
+      preprocessing:
+      - type: resize
+        size: 224
+        interpolation: nearest
+        use_pillow: True
+      postprocessing:
+      - type: encode_segmentation_mask
+        apply_to: annotation
+      - type: resize_segmentation_mask
+        apply_to: annotation
+        size: 224
+      metrics:
+      - type: segmentation_accuracy
+        use_argmax: False
+        reference: 0.83989

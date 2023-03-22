@@ -1,0 +1,31 @@
+models:
+- name: pedestrian-detection-adas-0002
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+  datasets:
+  - name: PedestrianDetectionDataset_label_1
+
+    preprocessing:
+    - type: resize
+      dst_width: 672
+      dst_height: 384
+    postprocessing:
+    - type: resize_prediction_boxes
+    - type: cast_to_int
+    - type: filter
+      height_range: 120
+      apply_to: annotation
+      is_empty: true
+    - type: filter
+      height_range: 120
+      apply_to: prediction
+      is_empty: true
+    metrics:
+    - type: map
+      integral: 11point
+      ignore_difficult: true
+      include_boundaries: true
+      allow_multiple_matches_per_ignored: true
+      use_filtered_tp: true
+      reference: 0.88

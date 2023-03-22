@@ -1,0 +1,24 @@
+models:
+  - name: detr_resnet50
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: detr
+          scores_out: "4589"
+          boxes_out: "4591"
+    datasets:
+      - name: COCO2017_detection_91cl_bkgr
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            dst_height: 800
+            dst_width: 1137
+            use_pillow: true
+          - type: rgb_to_bgr
+        postprocessing:
+          - type: resize_prediction_boxes
+        metrics:
+          - type: coco_precision
+            reference: 0.4236
+          - type: coco_orig_precision
+            reference: 0.3927

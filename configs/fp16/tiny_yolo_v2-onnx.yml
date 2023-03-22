@@ -1,0 +1,37 @@
+models:
+  - name: tiny_yolo_v2
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolo_v2
+          anchors: "1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52"
+          num: 5
+          coords: 4
+          classes: 20
+          cells: 13
+          raw_output: true
+
+    datasets:
+      - name: VOC2012_detection_no_bkgr
+
+        preprocessing:
+          - type: resize
+            size: 416
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: True
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+            reference: 0.489561

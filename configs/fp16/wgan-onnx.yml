@@ -1,0 +1,13 @@
+models:
+    - name: wgan
+      launchers:
+          - framework: dlsdk
+            adapter: image_processing
+      datasets:
+          - name: WGAN_pt_dataset
+            metrics:
+                - type: mae
+                  presenter: print_vector
+                  reference:
+                    mean: 47.711549
+                    std: 13.643086

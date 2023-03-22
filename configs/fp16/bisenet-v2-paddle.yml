@@ -1,0 +1,35 @@
+models:
+  - name: bisenet-v2
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: segmentation
+
+    datasets:
+      - name: Cityscapes_19cl
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            ignore_label: 19
+            presenter: print_vector
+            reference:
+              bicycle: 0.723341
+              building: 0.912331
+              bus: 0.789194
+              car: 0.938123
+              fence: 0.515879
+              mean: 0.731693
+              motorcycle: 0.504674
+              person: 0.780297
+              pole: 0.592924
+              rider: 0.538875
+              road: 0.978025
+              sidewalk: 0.820711
+              sky: 0.943429
+              terrain: 0.626187
+              traffic light: 0.635234
+              traffic sign: 0.734439
+              train: 0.695073
+              truck: 0.72787
+              vegetation: 0.919163
+              wall: 0.526401

@@ -1,0 +1,13 @@
+models:
+    - name: sgan
+      launchers:
+          - framework: dlsdk
+            adapter: image_processing
+      datasets:
+          - name: SGAN_dataset
+            metrics:
+                - type: mae
+                  presenter: print_vector
+                  reference:
+                    mean: 46.714217
+                    std: 13.528559

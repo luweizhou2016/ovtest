@@ -1,0 +1,31 @@
+models:
+  - name: roberta-base
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: reid
+          keep_shape: True
+          target_out: last_hidden_state
+        inputs:
+          - name: "input_ids"
+            type: INPUT
+            value: "input_ids"
+          - name: "attention_mask"
+            type: INPUT
+            value: "input_mask"
+
+    datasets:
+      - name: STS-B_test_roberta_padded
+
+        postprocessing:
+          - type: sentence_similarity_pooling
+
+        metrics:
+          - name: spearman@cosine
+            type: spearman_correlation_coef
+            similarity_distance: cosine
+
+          - name: pearson@cosine
+            type: pearson_correlation_coef
+            similarity_distance: cosine

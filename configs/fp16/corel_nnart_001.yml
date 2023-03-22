@@ -1,0 +1,31 @@
+models:
+  - name: corel_nnart_001
+    launchers:
+      - framework: dlsdk
+        inputs:
+          - name: 'input:0'
+            type: INPUT
+            layout: NHWC
+        adapter: 
+            type: image_processing
+            reverse_channels: True
+    datasets:
+      - name: COCO2017_style_transfer
+        preprocessing:
+          - type: resize
+            size: 1024
+        postprocessing:
+          - type: resize
+            apply_to: prediction
+
+        metrics:
+            - type: psnr
+              presenter: print_vector
+              reference:
+                mean: 10.729054
+                std: 2.989578
+            - type: ssim
+              presenter: print_vector
+              reference:
+                mean: 0.416568
+                std: 0.152937

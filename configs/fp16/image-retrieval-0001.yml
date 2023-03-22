@@ -1,0 +1,16 @@
+models:
+- name: image-retrieval-0001
+  launchers:
+  - framework: dlsdk
+    adapter: reid
+
+  datasets:
+  - name: TextileCrops
+
+    metrics:
+    - name: rank@1
+      type: cmc
+      top_k: 1
+      reference: 0.834
+    - type: reid_map
+      reference: 0.855644

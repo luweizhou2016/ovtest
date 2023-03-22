@@ -269,8 +269,13 @@ if __name__ == "__main__":
             acc_cmd = f"{prefix}accuracy_check --target_framework dlsdk -td CPU {tags} --use_new_api 1 --device_config {device_config_path} --definitions {definitions_file} --source {args.data_source} --annotations {utils.annotations} --model_attributes {utils.model_attributes} --models {mpath} -c {accyml} {ACCCFG}"
             print(f"======================={i}/{len(models)}")
             print(f"$ {acc_cmd}", flush=True)
-            if os.system(acc_cmd) == 0:
+            retv = os.system(acc_cmd)
+            if retv == 0:
                 break
+            else:
+                # exit on Ctrl+C
+                if (retv % 256) == 130:
+                    os.exit(retv)
 
         # serialize exec graph
         if args.eg:

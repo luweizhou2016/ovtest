@@ -1,0 +1,12 @@
+models:
+  - name: face-recognition-resnet50-aws
+    launchers:
+      - framework: dlsdk
+        adapter: reid
+
+    datasets:
+      - name: LFW_bin
+
+        metrics:
+          - type: pairwise_accuracy_subsets
+            reference: 0.623

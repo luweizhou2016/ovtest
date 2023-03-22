@@ -1,0 +1,32 @@
+models:
+  - name: Mask-AI-SRGAN
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: trimap
+    datasets:
+      - name: Topaz_MaskAI
+        preprocessing:
+          - type: resize
+            size: 768
+            interpolation: nearest
+          - type: alpha
+          - type: normalization
+            std:  (58.395, 57.12, 57.375)
+            mean: (123.675, 116.28, 103.53)
+          - type: trimap
+        postprocessing:
+          - type: resize
+            apply_to: prediction
+            resize_realization: opencv
+        metrics:
+          - type: psnr
+            presenter: print_vector
+            reference:
+              mean: 63.998332
+              std: 3.150814
+          - type: ssim
+            presenter: print_vector
+            reference:
+              mean: 0.999999
+              std: 0.000001

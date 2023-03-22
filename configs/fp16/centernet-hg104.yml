@@ -1,0 +1,20 @@
+models:
+    - name: centernet-hg104
+      launchers:
+          - framework: dlsdk
+            adapter:
+                type: tf_object_detection
+                classes_out: StatefulPartitionedCall/add_7
+                boxes_out: StatefulPartitionedCall/stack_4/Unsqueeze
+                scores_out: StatefulPartitionedCall/TopKV2.0
+                num_detections_out: StatefulPartitionedCall/Cast_5
+      datasets:
+          -   name: COCO2017_detection_91cl_bkgr
+              preprocessing:
+                  - type: resize
+                    size: 1024
+              postprocessing:
+                 - type: resize_prediction_boxes
+              metrics:
+                  -   type: coco_precision
+                      max_detections: 100

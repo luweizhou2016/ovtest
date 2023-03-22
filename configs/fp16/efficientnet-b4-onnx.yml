@@ -1,0 +1,27 @@
+models:
+- name: efficientnet-b4
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2012
+    reader: pillow_imread
+    preprocessing:
+    - type: rgb_to_bgr
+    - type: resize
+      size: 412
+      aspect_ratio_scale: greater
+      use_pillow: true
+      interpolation: BICUBIC
+    - type: crop
+      use_pillow: true
+      size: 380
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.82548
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.9608

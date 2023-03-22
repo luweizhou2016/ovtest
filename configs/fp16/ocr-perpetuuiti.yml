@@ -1,0 +1,36 @@
+models:
+- name: ocr-perpetuuiti
+  launchers:
+  - framework: dlsdk
+    inputs:
+    - name: input
+      type: INPUT
+      layout: NCWH
+    adapter:
+      type: beam_search_decoder
+      blank_label: 0
+      softmaxed_probabilities: True
+      vocabulary_file: ocr-perpetuuiti/vocab.txt
+
+  datasets:
+  - name: BenthamDatasetR0
+    reader:
+      type: opencv_imread
+      reading_flag: gray
+    preprocessing:
+    - type: resize
+      aspect_ratio_scale: fit_to_window
+      dst_height: 128
+      dst_width: 1024
+    - type: padding
+      dst_height: 128
+      dst_width: 1024
+      pad_value: background
+      pad_type: right_bottom
+    metrics:
+    - type: cer
+      reference: 0.128786
+    - type: wer
+      reference: 0.218123
+    - type: ser
+      reference: 0.821201

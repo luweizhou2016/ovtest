@@ -1,0 +1,21 @@
+models:
+- name: mobilenet-v1-0.50-160
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2012_bkgr
+    preprocessing:
+    - type: crop
+      central_fraction: 0.875
+    - type: resize
+      size: 160
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.5986
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.8204

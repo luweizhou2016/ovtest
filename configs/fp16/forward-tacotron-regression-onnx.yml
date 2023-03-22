@@ -1,0 +1,21 @@
+models:
+  - name: forward-tacotron-regression
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: multi_output_regression
+          outputs:
+          - mel
+        allow_reshape_input: True
+        inputs:
+          - name: 'data'
+            type: INPUT
+            layout: NHWC
+    datasets:
+      - name: ForwardTacotron-regression-io
+        metrics:
+          - type: mae
+            presenter: print_vector
+            reference:
+              mel@mean: 1.134815
+              mel@std: 0.048853

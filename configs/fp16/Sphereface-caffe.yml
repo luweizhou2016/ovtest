@@ -1,0 +1,16 @@
+models:
+- name: Sphereface
+  launchers:
+  - framework: dlsdk
+    adapter: reid
+  datasets:
+  - name: LFW
+    preprocessing:
+    - type: point_alignment
+      size: 400
+    - type: resize
+      dst_height: 112
+      dst_width: 96
+    metrics:
+    - type: pairwise_accuracy_subsets
+      reference: 0.988321

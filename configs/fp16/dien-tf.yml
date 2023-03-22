@@ -1,0 +1,53 @@
+models:
+  - name: dien_alibaba
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+          type: classification
+          fixed_output: True
+          block: True
+        inputs:
+        - name: "Inputs/mid_his_batch_ph"
+          type: INPUT
+          layout: "NC"
+          value: 'Inputs/mid_his_batch_ph'
+        - name: "Inputs/cat_his_batch_ph"
+          type: INPUT
+          layout: "NC"
+          value: 'Inputs/cat_his_batch_ph'
+        - name: "Inputs/mid_batch_ph"
+          type: INPUT
+          layout: "N"
+          value: 'Inputs/mid_batch_ph'
+        - name: "Inputs/uid_batch_ph"
+          type: INPUT
+          layout: "N"
+          value: 'Inputs/uid_batch_ph'
+        - name: "Inputs/cat_batch_ph"
+          type: INPUT
+          layout: "N"
+          value: 'Inputs/cat_batch_ph'
+        - name: "Inputs/mask"
+          type: INPUT
+          layout: "NC"
+          value: 'Inputs/mask'
+        - name: "Inputs/seq_len_ph"
+          type: INPUT
+          layout: "N"
+          value: 'Inputs/seq_len_ph'
+    datasets:
+      - name: AmazonProductData
+        batch: 1
+        reader:
+          type: numpy_reader
+          keys: 'Inputs/mid_his_batch_ph,Inputs/cat_his_batch_ph,Inputs/uid_batch_ph,Inputs/mid_batch_ph,Inputs/cat_batch_ph,Inputs/mask,Inputs/seq_len_ph'
+          separator: '#'
+          block: True
+        metrics:
+          - type: 'accuracy'
+            match: True
+            cast_to_int: True
+            reference: 0.512457
+          - type: 'roc_auc_score'
+            reference: 0.624607

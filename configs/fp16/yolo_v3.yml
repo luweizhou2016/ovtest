@@ -1,0 +1,148 @@
+models:
+  - name: yolo_v2
+
+    launchers:
+      - framework: caffe
+        device: CPU
+        model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+
+
+      - framework: dlsdk
+        device: CPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        cpu_extensions: AUTO
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+
+      - framework: dlsdk
+        tags:
+         - GPU32
+        device: GPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+
+      - framework: dlsdk
+        tags:
+         - GPU16
+        device: GPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+        mo_params:
+          data_type: FP16
+
+      - framework: dlsdk
+        device: MYRIAD
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+        mo_params:
+          data_type: FP16
+
+      - framework: dlsdk
+        device: HDDL
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+        mo_params:
+          data_type: FP16
+
+      - framework: dlsdk
+        tags:
+          - FPGA16
+        device: HETERO:FPGA,CPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+        cpu_extensions: AUTO
+        bitstream: 5-0_A10DK_FP16_AlexNet_GoogleNet.aocx
+
+      - framework: dlsdk
+        tags:
+          - FPGA11
+        device: HETERO:FPGA,CPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v3/caffe/yolo_v3.caffemodel
+        adapter:
+          type: yolo_v3
+          anchors: yolo_v3
+          num: 3
+          coord: 4
+          classes: 80
+          threshold: 0.001
+        cpu_extensions: AUTO
+        bitstream: 5-0_A10DK_FP11_MobileNet_Clamp.aocx
+
+    datasets:
+      - name: COCO2017_80cl
+        data_source: /home/automation/datasets/MSCOCO/data/val2017
+        annotation: mscoco_detection.pickle
+        dataset_meta: mscoco_detection.json
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: resize
+            size: 416
+          - type: normalization
+            std: 255.0
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: True
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: coco_precision
+            max_detections: 100
+            threshold: .5

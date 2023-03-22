@@ -1,0 +1,30 @@
+models:
+  - name: instance-segmentation-security-1025
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: mask_rcnn
+          classes_out: classes
+          scores_out: scores
+          boxes_out: boxes
+          raw_masks_out: raw_masks
+        inputs:
+          - name: im_info
+            type: IMAGE_INFO
+
+    datasets:
+      - name: COCO2017_mask_rcnn_80cl_bkgr
+
+        preprocessing:
+          - type: resize
+            size: 480
+
+        metrics:
+          - name: AP@masks
+            type: coco_orig_segm_precision
+            reference: 0.2837
+
+          - name: AP@boxes
+            type: coco_orig_precision
+            reference: 0.3299

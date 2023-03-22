@@ -1,0 +1,39 @@
+models:
+  - name: i3d-rgb
+    launchers:
+     - framework: dlsdk
+       adapter: classification
+       inputs:
+         - name: Placeholder
+           type: INPUT
+           layout: NCDHW
+     - framework: openvino
+       adapter: classification
+       inputs:
+         - name: Placeholder
+           type: INPUT
+           layout: NDHWC
+    datasets:
+      - name: Kinetics-400_frames_79_400
+        reader: pillow_imread
+        preprocessing:
+        - type: resize
+          size: 256
+          aspect_ratio_scale: fit_to_window
+        - type: crop
+          size: 224
+        metrics:
+          - type: clip_accuracy
+            presenter: print_vector
+            reference:
+              clip_accuracy: 0.648333
+              video_accuracy: 0.73183
+              mean: 0.690081
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.6483
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.8458

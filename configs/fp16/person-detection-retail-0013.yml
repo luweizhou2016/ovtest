@@ -1,0 +1,32 @@
+models:
+- name: person-detection-retail-0013
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+  datasets:
+  - name: DatatangStreetSubway
+
+    preprocessing:
+    - type: resize
+      dst_width: 544
+      dst_height: 320
+    postprocessing:
+    - type: resize_prediction_boxes
+    - type: filter
+      apply_to: annotation
+      height_range: 100
+      aspect_ratio: 0.666, 5
+      is_empty: true
+      min_visibility: partially occluded
+    - type: filter
+      apply_to: prediction
+      height_range: 100
+      is_empty: true
+      aspect_ratio: 0.666, 5
+    metrics:
+    - type: map
+      ignore_difficult: true
+      include_boundaries: true
+      allow_multiple_matches_per_ignored: false
+      distinct_conf: false
+      reference: 0.8862

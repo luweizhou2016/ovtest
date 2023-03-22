@@ -1,0 +1,19 @@
+models:
+  - name: f3net
+    launchers:
+      - framework: dlsdk
+        adapter: salient_object_detection
+    datasets:
+      - name: PASCAL-S
+        preprocessing:
+          - type: resize
+            size: 352
+        postprocessing:
+          - type: resize
+            apply_to: prediction
+          - type: normalize_salience_map
+        metrics:
+          - type: salience_f-measure
+            presenter: print_vector
+            reference:
+              f-measure: 0.8421

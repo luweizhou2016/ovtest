@@ -1,0 +1,36 @@
+models:
+  - name: DLRM
+    launchers:
+      - framework: dlsdk
+        adapter:
+            type: classification
+            argmax_output: True
+            block: True
+        inputs:
+          - name: "input.1"
+            type: INPUT
+            value: "input.1"
+            layout: "NC"
+          - name: "lS_i"
+            type: INPUT
+            value: "lS_i"
+            layout: "CN"
+          - name: "lS_o"
+            type: INPUT
+            value: "lS_o"
+            layout: "CN"
+
+    datasets:
+      - name: CriteoKaggle_block_128
+        batch: 1
+        reader:
+          type: numpy_reader
+          keys: 'input.1,lS_i,lS_o'
+          separator: '#'
+          block: True
+        postprocessing:
+          - type: cast_to_int
+            round_policy: nearest
+        metrics:
+          - type: 'accuracy'
+            match: True

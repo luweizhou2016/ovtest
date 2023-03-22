@@ -1,0 +1,26 @@
+models:
+  - name:  ssd-resnet34-300x300
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ssd_multilabel
+          scores_out: 'v/Softmax'
+          boxes_out: 'v/stack/Unsqueeze'
+          confidence_threshold: 0.05
+          nms_threshold: 0.5
+          diff_coord_order: True
+          max_detections: 200
+
+    datasets:
+      - name: COCO2017_detection_80cl_bkgr
+        preprocessing:
+          - type: resize
+            size: 300
+            interpolation: BILINEAR
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: coco_precision
+            reference: 0.2199

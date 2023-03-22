@@ -1,0 +1,18 @@
+models:
+    - name: cnn-tdnnf-lstm
+      launchers:
+          - framework: dlsdk
+            adapter: kaldi_feat_regression
+      datasets:
+        - name: CNN-TDNNF_LSTM_CMVN_feats
+
+          reader:
+            type: kaldi_ark_reader
+          preprocessing:
+              - type: context_window
+                cw_l: 21
+                cw_r: 28
+                to_multi_infer: True
+          metrics:
+              - type: mae
+                presenter: print_vector

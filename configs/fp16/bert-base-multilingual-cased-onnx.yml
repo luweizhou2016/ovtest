@@ -1,0 +1,26 @@
+models:
+    - name: bert-base-multilingual-cased
+      launchers:
+        - framework: dlsdk
+          adapter:
+            type: reid
+            target_out: "1609"
+          inputs:
+            - name: "input_ids"
+              type: INPUT
+              value: "input_ids"
+            - name: "attention_mask"
+              type: INPUT
+              value: 'input_mask'
+            - name: 'token_type_ids'
+              type: INPUT
+              value: 'segment_ids'
+      datasets:
+        - name: STS-B_test_bert_multilingual_cased_padded
+          metrics:
+            - type: spearman_correlation_coef
+              similarity_distance: cosine
+              name: spearman@cosine
+            - type: pearson_correlation_coef
+              similarity_distance: cosine
+              name: pearson@cosine

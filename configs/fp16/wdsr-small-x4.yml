@@ -1,0 +1,19 @@
+models:
+    - name: wdsr-small-x4
+      launchers:
+          - framework: onnx_runtime
+            adapter: super_resolution
+      datasets:
+        - name: SR_collection
+          preprocessing:
+              - type: resize
+                dst_height: 240
+                dst_width: 135
+              - type: normalization
+                std: 255
+          postprocessing:
+              - type: resize
+                apply_to: prediction
+          metrics:
+            -  type: psnr
+               presenter: print_vector

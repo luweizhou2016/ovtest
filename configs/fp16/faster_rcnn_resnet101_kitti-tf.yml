@@ -1,0 +1,27 @@
+models:
+  - name:  faster_rcnn_resnet101_kitti
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[600, 1987, 1]]
+
+    datasets:
+      - name: KITTI_2D_detection
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            dst_height: 600
+            dst_width: 1987
+          - type: padding
+            dst_height: 600
+            dst_width: 1987
+            pad_type: right_bottom
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            dst_height: 600
+            dst_width: 1987
+        metrics:
+          - type: map

@@ -1,0 +1,63 @@
+models:
+  - name: googlenet-v4
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   public/googlenet-v4/googlenet-v4.prototxt
+        weights: public/googlenet-v4/googlenet-v4.caffemodel
+        inputs:
+            - name: "data"
+              type: INPUT
+              shape: 3, 299, 299
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        backend: OCV
+        model:   public/googlenet-v4/googlenet-v4.prototxt
+        weights: public/googlenet-v4/googlenet-v4.caffemodel
+        inputs:
+            - name: "data"
+              type: INPUT
+              shape: 3, 299, 299
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        backend: OCV
+        model:   public/googlenet-v4/googlenet-v4.prototxt
+        weights: public/googlenet-v4/googlenet-v4.caffemodel
+        inputs:
+            - name: "data"
+              type: INPUT
+              shape: 3, 299, 299
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2012
+        data_source: ImageNet
+
+        preprocessing:
+          - type: resize
+            size: 320
+
+          - type: crop
+            size: 299
+
+          - type: normalization
+            std: 255
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

@@ -1,0 +1,24 @@
+models:
+  - name: ssdlite-mobilenet-v3-small-320-coco
+    launchers:
+      - framework: dlsdk
+        adapter:
+            type: ppdetection
+            boxes_out: 'save_infer_model/scale_0.tmp_1'
+            num_boxes_out: 'save_infer_model/scale_1.tmp_1'
+        inputs:
+            - name: im_shape
+              type: IMAGE_INFO
+            - name: scale_factor
+              type: SCALE_FACTOR
+
+    datasets:
+      - name: COCO2017_detection_80cl
+        preprocessing:
+          - type: resize
+            size: 320
+            interpolation: CUBIC
+
+        metrics:
+          - type: coco_orig_precision
+            reference: 0.149267

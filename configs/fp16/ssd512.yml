@@ -1,0 +1,60 @@
+models:
+  - name: ssd512
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        backend: OCV
+        model:   object_detection/common/ssd/512/caffe/models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
+        weights: object_detection/common/ssd/512/caffe/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 512, 512
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        backend: OCV
+        model:   object_detection/common/ssd/512/caffe/models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
+        weights: object_detection/common/ssd/512/caffe/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 512, 512
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        backend: OCV
+        model:   object_detection/common/ssd/512/caffe/models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
+        weights: object_detection/common/ssd/512/caffe/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 512, 512
+        adapter: ssd
+
+    datasets:
+      - name: VOC2007_detection
+
+        preprocessing:
+          - type: resize
+            size: 512
+
+          - type: normalization
+            mean: 104, 117, 123
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: False

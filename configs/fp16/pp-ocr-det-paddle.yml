@@ -1,0 +1,32 @@
+models:
+  - name: pp-ocr-det
+    launchers:
+      - framework: dlsdk
+        adapter: ppocr_det
+        allow_reshape_input: true
+
+    datasets:
+      - name: RCTW_detection
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: ppocr_max_ratio
+            size: 736
+            factor: 32
+            include_boundary: True
+
+        metrics:
+          - type: focused_text_hmean
+            ignore_difficult: True
+            area_recall_constrain: 0.5
+            area_precision_constrain: 0.5
+            reference: 0.423684
+          - type: focused_text_precision
+            ignore_difficult: True
+            area_recall_constrain: 0.5
+            area_precision_constrain: 0.5
+            reference: 0.784777
+          - type: focused_text_recall
+            ignore_difficult: True
+            area_recall_constrain: 0.5
+            area_precision_constrain: 0.5
+            reference: 0.29017

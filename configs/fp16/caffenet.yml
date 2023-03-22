@@ -1,0 +1,63 @@
+models:
+- name: caffenet-cf
+  launchers:
+  - framework: caffe
+    model: public/caffenet/deploy.prototxt
+    weights: public/caffenet/bvlc_reference_caffenet.caffemodel
+    adapter: classification
+  datasets:
+  - name: imagenet_1000_classes
+    preprocessing:
+    - type: resize
+      size: 256
+    - type: crop
+      size: 227
+    - type: normalization
+      mean: 104, 117, 123
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+- name: caffenet
+  launchers:
+  - framework: dlsdk
+    tags:
+    - FP32
+    model: caffenet/caffe/FP32/caffenet.xml
+    weights: caffenet/caffe/FP32/caffenet.bin
+    adapter: classification
+  - framework: dlsdk
+    tags:
+    - INT8
+    model: caffenet/caffe/INT8/caffenet.xml
+    weights: caffenet/caffe/INT8/caffenet.bin
+    adapter: classification
+  - framework: dlsdk
+    tags:
+    - FP32-INT8
+    model: caffenet/caffe/FP32-INT8/caffenet.xml
+    weights: caffenet/caffe/FP32-INT8/caffenet.bin
+    adapter: classification
+  - framework: dlsdk
+    tags:
+    - FP16-INT8
+    model: caffenet/caffe/FP16-INT8/caffenet.xml
+    weights: caffenet/caffe/FP16-INT8/caffenet.bin
+    adapter: classification
+  datasets:
+  - name: imagenet_1000_classes
+    preprocessing:
+    - type: resize
+      size: 256
+    - type: crop
+      size: 227
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5

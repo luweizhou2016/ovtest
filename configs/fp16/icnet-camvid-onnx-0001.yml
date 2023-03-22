@@ -1,0 +1,42 @@
+models:
+  - name: icnet-camvid-onnx-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+
+    datasets:
+      - name: CamVid_12cl
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            dst_height: 768
+            dst_width: 768
+            use_pillow: True
+            interpolation: BILINEAR
+          - type: bgr_to_rgb
+
+        postprocessing:
+          - type: resize_segmentation_mask
+            apply_to: annotation
+            dst_height: 768
+            dst_width: 768
+
+        metrics:
+          - type: mean_iou
+            use_argmax: True
+            presenter: print_vector
+            reference:
+              Sky: 0.914367
+              Building: 0.842986
+              Pole: 0.111546
+              Road: 0.939544
+              Pavement: 0.802071
+              Tree: 0.882991
+              SignSymbol: 0.352193
+              Fence: 0.640418
+              Car: 0.802636
+              Pedestrian: 0.310389
+              Bycyclist: 0.596168
+              mean: 0.654119

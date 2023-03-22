@@ -1,0 +1,21 @@
+models:
+  - name: faster_rcnn_inception_resnet_v2_atrous_oid_v4
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[600, 1024, 1]]
+
+    datasets:
+      - name: OpenImagesDataset_v4
+
+        preprocessing:
+          - type: resize
+            dst_width: 1024
+            dst_height: 600
+
+        metrics:
+          - type: map
+            reference: 0.3565

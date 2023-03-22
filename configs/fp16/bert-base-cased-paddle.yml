@@ -1,0 +1,25 @@
+models:
+  - name: bert-base-cased
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        inputs:
+          - name: "input_ids"
+            type: INPUT
+            value: "input_ids"
+          - name: "token_type_ids"
+            type: INPUT
+            value: "segment_ids"
+        adapter:
+          type: bert_classification
+          num_classes: 2
+    datasets:
+      - name: SST-2_bert_cased_padded
+        reader:
+          type: annotation_features_extractor
+          features:
+            - input_ids
+            - input_mask
+            - segment_ids
+        metrics:
+          - type: accuracy

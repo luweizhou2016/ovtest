@@ -1,0 +1,22 @@
+models:
+- name: darknet19
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2015
+    preprocessing:
+    - type: resize
+      size: 256
+      aspect_ratio_scale: greater
+    - type: crop
+      size: 256
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.74382
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.91962

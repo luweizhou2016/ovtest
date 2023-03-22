@@ -1,0 +1,30 @@
+models:
+    - name: vggvox
+      launchers:
+          - framework: dlsdk
+            adapter: reid
+      datasets:
+           - name: VoxCelebV1_verification
+             reader:
+                 type: wav_reader
+                 mono: True
+             preprocessing:
+                 - type: remove_dc_and_dither
+                   alpha: 0.99
+                 - type: audio_preemph
+                   preemph: 0.97
+                 - type: frame_signal_overlap
+                   frame_len: 0.025
+                   frame_step: 0.01
+                   window: hamming
+                 - type: fft
+                   magnitude_squared: False
+                 - type: transpose
+                   axes: [0, 2, 1]
+                 - type: audio_normalization
+                   per_frame: True
+                 - type: truncate_bucket
+                   bucket: 1000
+             metrics:
+                 - type: pairwise_accuracy_subsets
+                   reference: 0.513946

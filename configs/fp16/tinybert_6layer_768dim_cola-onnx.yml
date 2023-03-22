@@ -1,0 +1,32 @@
+models:
+    - name: tinybert_6layer_768dim_cola
+      launchers:
+          - framework: dlsdk
+            adapter:
+              type: bert_classification
+              num_classes: 2
+              classification_out: '832'
+
+            inputs:
+                -   name: "input_ids"
+                    type: INPUT
+                    value: "input_ids"
+                -   name: "segment_ids"
+                    type: INPUT
+                    value: 'segment_ids'
+                -   name: 'input_mask'
+                    type: INPUT
+                    value: 'input_mask'
+      datasets:
+          - name: CoLA_tinybert_uncased
+            reader:
+                type: annotation_features_extractor
+                features:
+                  - input_ids
+                  - input_mask
+                  - segment_ids
+            metrics:
+                  - type: metthews_correlation_coef
+                    reference: 0.537179
+                  - type: accuracy
+                    reference: 0.81094

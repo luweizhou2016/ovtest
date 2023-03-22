@@ -1,0 +1,24 @@
+models:
+  - name: yolact-resnet101-fpn-pytorch
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolact
+          boxes_out: "boxes"
+          conf_out: "conf"
+          mask_out: "mask"
+          proto_out: "proto"
+    datasets:
+      - name:  COCO2017_mask_rcnn_80cl
+        preprocessing:
+          - type: resize
+            size: 550
+            use_pillow: True
+        metrics:
+          - name: AP@masks
+            type: coco_orig_segm_precision
+            reference: 0.29699
+
+          - name: AP@boxes
+            type: coco_precision
+            reference: 0.32818

@@ -1,0 +1,21 @@
+models:
+  - name: hifi-gan
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: multi_output_regression
+          outputs:
+            - audio
+        allow_reshape_input: True
+        inputs:
+          - name: 'mel'
+            type: INPUT
+            layout: NHWC
+    datasets:
+      - name: HiFi-GAN
+        metrics:
+          - type: relative_l2_error
+            presenter: print_vector
+            reference:
+              mean: 0.000005
+              std: 0.000001

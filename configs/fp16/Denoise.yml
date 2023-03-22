@@ -1,0 +1,26 @@
+models:
+  - name: Denoise
+    launchers:
+      - framework: dlsdk
+
+        adapter: 
+          type: image_processing
+
+    
+    datasets:
+      - name: DenoiseDataset_lpips
+        preprocessing:
+          - type: normalization
+            std: 255
+            images_only: true
+
+
+        metrics:
+          - type: lpips
+            presenter: print_vector
+            color_order: BGR
+            distance_threshold: 0.1
+            reference:
+              mean: 0.26595
+              ratio_greater_0.1: 0.914697
+              std: 0.162631

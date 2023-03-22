@@ -1,0 +1,57 @@
+models:
+  - name: person-attributes-recognition-crossroad-0031
+
+    launchers:
+      - framework: dlsdk
+        adapter: person_attributes
+
+    datasets:
+      - name: Market-1501_person_attributes_6_attr
+
+        preprocessing:
+          - type: crop_rect
+          - type: resize
+            dst_width: 80
+            dst_height: 160
+
+        metrics:
+          - type: multi_accuracy
+            presenter: print_vector
+            reference:
+              average: 0.917282
+              has coat_jacket: 0.935602
+              has_hat: 0.974326
+              has_longhair: 0.889132
+              has_longpants: 0.902587
+              has_longsleeves: 0.933382
+              is_male: 0.869279
+          - type: multi_precision
+            presenter: print_vector
+            reference:
+              average: 0.83802
+              has coat_jacket: 0.283556
+              has_hat: 0.793722
+              has_longhair: 0.831512
+              has_longpants: 0.8568
+              has_longsleeves: 0.313679
+              is_male: 0.924663
+          - type: multi_recall
+            presenter: print_vector
+            reference:
+              average: 0.783446
+              has coat_jacket: 0.160786
+              has_hat: 0.288039
+              has_longhair: 0.766795
+              has_longpants: 0.868409
+              has_longsleeves: 0.49473
+              is_male: 0.842357
+          - type: f1-score
+            presenter: print_vector
+            reference:
+              average: 0.809814
+              has coat_jacket: 0.205211
+              has_hat: 0.422687
+              has_longhair: 0.797843
+              has_longpants: 0.862566
+              has_longsleeves: 0.383931
+              is_male: 0.881593

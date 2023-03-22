@@ -1,0 +1,21 @@
+models:
+- name: googlenet-v3
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2015_bkgr
+    preprocessing:
+    - type: crop
+      max_square: True
+    - type: resize
+      size: 299
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.78422
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.94168

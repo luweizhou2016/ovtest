@@ -1,0 +1,27 @@
+models:
+    - name: distilbert-base-cased
+      launchers:
+          - framework: dlsdk
+            adapter:
+                type: reid
+                target_out: "last_hidden_state"
+                keep_shape: True
+            inputs:
+            - name: "input_ids"
+              type: INPUT
+              value: "input_ids"
+            - name: "attention_mask"
+              type: INPUT
+              value: "input_mask"
+
+      datasets:
+          - name: STS-B_test_distilbert_cased_padded
+            postprocessing:
+              - type: sentence_similarity_pooling
+            metrics:
+                - type: spearman_correlation_coef
+                  similarity_distance: cosine
+                  name: spearman@cosine
+                - type: pearson_correlation_coef
+                  similarity_distance: cosine
+                  name: pearson@cosine

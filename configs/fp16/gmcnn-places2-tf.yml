@@ -1,0 +1,40 @@
+models:
+  - name: gmcnn-places2
+    launchers:
+      - framework: dlsdk
+        adapter: inpainting
+        inputs:
+          - name: "Placeholder"
+            type: INPUT
+            value: '.*image'
+          - name: "Placeholder_1"
+            type: INPUT
+            value: '.*mask'
+
+    datasets:
+      - name: VOC2012_inpainting_free_form_mask
+        preprocessing:
+          - type: crop
+            dst_width: 680
+            dst_height: 512
+          - type: custom_mask
+            mask_dir: free_form_masks/masks_2k
+
+        postprocessing:
+          - type: crop_image
+            dst_width: 680
+            dst_height: 512
+            apply_to: annotation
+
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+            reference:
+              mean: 33.41
+              std: 4.47
+          - type: ssim
+            presenter: print_vector
+            reference:
+              mean: 0.991
+              std: 0.0079

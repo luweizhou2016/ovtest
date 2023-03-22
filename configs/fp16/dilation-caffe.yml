@@ -1,0 +1,39 @@
+models:
+  - name: dilation
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+    datasets:
+      - name: Cityscapes_19cl
+
+        preprocessing:
+          - type: tiling
+            margin: 186
+            size: 1396
+
+        metrics:
+          - type: mean_iou
+            presenter: print_vector
+            reference:
+              background: 0
+              bicycle: 0.628458
+              building: 0.839428
+              bus: 0.703922
+              car: 0.899993
+              fence: 0.437189
+              mean: 0.588119
+              motorcycle: 0.406368
+              person: 0.694142
+              pole: 0.474117
+              rider: 0.481867
+              road: 0.78288
+              sidewalk: 0.673245
+              sky: 0.858456
+              terrain: 0.529141
+              traffic light: 0.491603
+              traffic sign: 0.585169
+              train: 0.495508
+              truck: 0.502755
+              vegetation: 0.879534
+              wall: 0.398614

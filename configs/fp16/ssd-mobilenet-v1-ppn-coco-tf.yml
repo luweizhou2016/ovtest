@@ -1,0 +1,17 @@
+models:
+- name: ssd-mobilenet-v1-ppn-coco
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+  datasets:
+  - name: COCO2017_detection_91cl_bkgr
+    preprocessing:
+    - type: resize
+      size: 300
+    postprocessing:
+    - type: resize_prediction_boxes
+    metrics:
+    - type: coco_precision
+      reference: 0.249924
+    - type: coco_orig_precision
+      reference: 0.236404

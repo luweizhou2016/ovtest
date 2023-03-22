@@ -1,0 +1,28 @@
+models:
+    - name: bert-large
+      launchers:
+          - framework: dlsdk
+            adapter:
+                type: reid
+                keep_shape: True
+            inputs:
+                -   name: "Placeholder"
+                    type: INPUT
+                    value: "input_ids"
+                -   name: "Placeholder_1"
+                    type: INPUT
+                    value: "input_mask"
+                -   name: "Placeholder_2"
+                    type: INPUT
+                    value: "segment_ids"
+      datasets:
+          - name: STS-B_test_bert_cased_padded
+            postprocessing:
+              - type: sentence_similarity_pooling
+            metrics:
+                - type: spearman_correlation_coef
+                  similarity_distance: cosine
+                  name: spearman@cosine
+                - type: pearson_correlation_coef
+                  similarity_distance: cosine
+                  name: pearson@cosine

@@ -1,0 +1,81 @@
+models:
+- name: person-detection-action-recognition-teacher-0002
+  launchers:
+  - framework: dlsdk
+    adapter:
+      type: action_detection
+      priorbox_out: mbox/priorbox
+      loc_out: mbox_loc1/out/conv/flat
+      main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
+      add_conf_out_prefix: out/anchor
+      add_conf_out_count: 4
+      num_action_classes: 3
+      detection_threshold: 0.4
+      action_confidence_threshold: 0.75
+      action_scale: 3
+  datasets:
+  - name: ActionDetectionDataset_teacher
+
+    reader: opencv_capture
+    preprocessing:
+    - type: resize
+      dst_width: 680
+      dst_height: 400
+    postprocessing:
+    - type: soft_nms
+      sigma: 0.6
+      min_score: 0.4
+      keep_top_k: 200
+    - type: clip_boxes
+      apply_to: prediction
+      boxes_normalized: true
+    - type: filter
+      is_empty: true
+      apply_to: prediction
+      remove_filtered: true
+    - type: normalize_boxes
+    - type: clip_boxes
+      apply_to: annotation
+      boxes_normalized: true
+    metrics:
+    - type: detection_accuracy
+      use_normalization: true
+      annotation_source: action_annotation
+      prediction_source: action_prediction
+      label_map: action_label_map
+      fast_match: true
+      reference: 0.724
+
+  - name: ActionDetectionDataset_3_classes
+
+    preprocessing:
+    - type: resize
+      dst_width: 680
+      dst_height: 400
+    postprocessing:
+    - type: soft_nms
+      sigma: 0.6
+      min_score: 0.4
+      keep_top_k: 200
+    - type: clip_boxes
+      apply_to: prediction
+      boxes_normalized: true
+    - type: filter
+      is_empty: true
+      apply_to: prediction
+      remove_filtered: true
+    - type: normalize_boxes
+    - type: clip_boxes
+      apply_to: annotation
+      boxes_normalized: true
+    metrics:
+    - type: map
+      name: class_agnostic@ap
+      ignore_difficult: false
+      include_boundaries: false
+      allow_multiple_matches_per_ignored: false
+      distinct_conf: true
+      annotation_source: person_annotation
+      prediction_source: class_agnostic_prediction
+      label_map: person_label_map
+      reference: 0.8

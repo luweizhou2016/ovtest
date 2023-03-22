@@ -1,0 +1,13 @@
+models:
+  - name: STN
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+    datasets:
+      - name: MNIST_cluttered
+        reader:
+          type: opencv_imread
+          reading_flag: gray
+        metrics:
+          - type: accuracy
+            reference: 0.9447

@@ -1,0 +1,69 @@
+models:
+  - name: mtcnn-p
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        backend: OCV
+        model:   object_detection/common/mtcnn/p/caffe/mtcnn-p.prototxt
+        weights: object_detection/common/mtcnn/p/caffe/mtcnn-p.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 720, 1280
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        backend: OCV
+        model:   object_detection/common/mtcnn/p/caffe/mtcnn-p.prototxt
+        weights: object_detection/common/mtcnn/p/caffe/mtcnn-p.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 720, 1280
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        backend: OCV
+        model:   object_detection/common/mtcnn/p/caffe/mtcnn-p.prototxt
+        weights: object_detection/common/mtcnn/p/caffe/mtcnn-p.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 720, 1280
+        adapter: ssd
+
+    datasets:
+      - name: WiderFace_label_1
+        subsample_size: 50
+
+        preprocessing:
+          - type: resize
+            dst_width:  720
+            dst_height: 1280
+
+          - type: normalization
+            mean: 127.5
+            std:  128
+
+        postprocessing:
+            - type: resize_prediction_boxes
+
+            - type: filter
+              height_range: 100
+              apply_to: annotation
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: True

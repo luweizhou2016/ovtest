@@ -1,0 +1,20 @@
+  models:
+    - name: prnet
+      launchers:
+        - framework: dlsdk
+          adapter: prnet
+      datasets:
+        - name: AFLW2000-3D
+
+          preprocessing:
+            - type: similarity_transform_box
+              size: 256
+              box_scale: 1.6
+          metrics:
+            - type: nme
+              name: NME2D
+              only_2d: True
+              reference: 0.023083
+            - type: nme
+              name: NME3D
+              reference: 0.049256

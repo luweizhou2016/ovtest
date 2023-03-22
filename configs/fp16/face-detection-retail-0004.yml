@@ -1,0 +1,29 @@
+models:
+- name: face-detection-retail-0004
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+
+  datasets:
+  - name: WiderFace_label_1
+
+    preprocessing:
+    - type: resize
+      size: 300
+    postprocessing:
+    - type: resize_prediction_boxes
+    - type: cast_to_int
+    - type: filter
+      apply_to: annotation
+      height_range: 60
+      is_empty: true
+    - type: filter
+      min_confidence: 0.0
+      apply_to: prediction
+    metrics:
+    - type: map
+      ignore_difficult: true
+      include_boundaries: false
+      allow_multiple_matches_per_ignored: false
+      distinct_conf: false
+      reference: 0.83

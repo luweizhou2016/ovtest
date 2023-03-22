@@ -1,0 +1,20 @@
+models:
+    - name: acgan
+      launchers:
+          - framework: dlsdk
+            adapter: image_processing
+            inputs:
+                - name: "0"
+                  type: INPUT
+                  value: "z_100.*"
+                - name: "input.1"
+                  type: INPUT
+                  value: "labels.*"
+      datasets:
+          - name: ACGAN_dataset
+            metrics:
+                - type: mae
+                  presenter: print_vector
+                  reference:
+                    mean: 46.683186
+                    std: 11.837911

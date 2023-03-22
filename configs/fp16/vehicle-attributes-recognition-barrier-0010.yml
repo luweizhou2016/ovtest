@@ -1,0 +1,92 @@
+models:
+  - name: vehicle-attributes-recognition-barrier-0010
+
+    launchers:
+      - framework: caffe
+        device: CPU
+        model: intel/Security/object_attributes/vehicle/resnet10/caffe/test.prototxt
+        weights: intel/Security/object_attributes/vehicle/resnet10/caffe/ip_clean_resnet10_nolastlayer_red128_iter_50000.caffemodel
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+
+      - framework: dlsdk
+        device: CPU
+        caffe_model: intel/Security/object_attributes/vehicle/resnet10/caffe/test.prototxt
+        caffe_weights: intel/Security/object_attributes/vehicle/resnet10/caffe/ip_clean_resnet10_nolastlayer_red128_iter_50000.caffemodel
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+
+      - framework: dlsdk
+        device: GPU
+        caffe_model: intel/Security/object_attributes/vehicle/resnet10/caffe/test.prototxt
+        caffe_weights: intel/Security/object_attributes/vehicle/resnet10/caffe/ip_clean_resnet10_nolastlayer_red128_iter_50000.caffemodel
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+
+      - framework: dlsdk
+        device: GPU
+        caffe_model: intel/Security/object_attributes/vehicle/resnet10/caffe/test.prototxt
+        caffe_weights: intel/Security/object_attributes/vehicle/resnet10/caffe/ip_clean_resnet10_nolastlayer_red128_iter_50000.caffemodel
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+        mo_params:
+          data_type: FP16
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        caffe_model: intel/Security/object_attributes/vehicle/resnet10/caffe/test.prototxt
+        caffe_weights: intel/Security/object_attributes/vehicle/resnet10/caffe/ip_clean_resnet10_nolastlayer_red128_iter_50000.caffemodel
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+        bitstream: 2-0-2_A10DK_FP16_ResNet.aocx
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        caffe_model: intel/Security/object_attributes/vehicle/resnet10/caffe/test.prototxt
+        caffe_weights: intel/Security/object_attributes/vehicle/resnet10/caffe/ip_clean_resnet10_nolastlayer_red128_iter_50000.caffemodel
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+        bitstream: 2-0-2_A10DK_FP11_ResNet.aocx
+
+    datasets:
+      - name: VehicleColor
+
+        data_source: VehicleColor/data
+        annotation: vehicle_attributes.pickle
+        dataset_meta: vehicle_attributes.json
+
+        preprocessing:
+          - type: extend_around_rect
+            augmentation_param: 0.3
+          - type: crop_rect
+          - type: resize
+            size: 307
+          - type: crop
+            size: 192
+          - type: normalization
+            std: 255.0
+
+        metrics:
+          - type: accuracy_per_class
+            presenter: print_vector
+            annotation_source: color
+            prediction_source: color
+            label_map: color_label_map
+
+          - type: accuracy_per_class
+            presenter: print_vector
+            annotation_source: type
+            prediction_source: type
+            label_map: type_label_map

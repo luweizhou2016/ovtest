@@ -1,0 +1,31 @@
+models:
+    - name: wsj_dnn5b_smbr
+      launchers:
+        - framework: dlsdk
+          adapter:
+            type: kaldi_latgen_faster_mapped
+            words_file: wsj_dnn5b/words.txt
+            fst_file: wsj_dnn5b/HCLG.fst
+            transition_model_file: wsj_dnn5b/final.mdl
+            beam: 13
+            lattice_beam: 6
+            acoustic_score: 0.0833
+            allow_partial: True
+            min_active: 200
+            max_active: 7000
+            inverse_acoustic_scale: 13.0
+          reset_memory_state: true
+          device_config:
+            GNA:
+              GNA_SCALE_FACTOR: "2175.43"
+      datasets:
+          - name: kaldi_wsj_dnn5b_feats
+            metrics:
+                - type: wer
+                  abs_threshold: 0.09
+                  rel_threshold: 0.00001
+                  reference: 0.065217
+                - type: ser
+                  rel_threshold: 0.00001
+                  reference: 0.524851
+
