@@ -1,0 +1,31 @@
+models:
+  - name: squeezenet1.1-pytorch1.2.0
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2012
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: true
+            interpolation: BILINEAR
+          - type: crop
+            size: 224
+            use_pillow: true
+          - type: rgb_to_bgr
+            # Reference metric from PyTorch top-1 58.19% top-5 80.62%
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.5819
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.8062

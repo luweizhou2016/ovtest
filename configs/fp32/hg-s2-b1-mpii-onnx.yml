@@ -1,0 +1,27 @@
+models:
+  - name: hg-s2-b1-mpii
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: stacked_hourglass
+          score_map_output: '1252'
+
+    datasets:
+      - name: MPII
+        reader: pillow_imread
+        preprocessing:
+          - type: object_crop_with_scale
+            size: 256
+          - type: rgb_to_bgr
+        metrics:
+          - type: pckh
+            presenter: print_vector
+            reference:
+              ankle: 0.779649
+              elbow: 0.881199
+              head: 0.960778
+              hip: 0.872944
+              knee: 0.817647
+              mean: 0.87175
+              shoulder: 0.94786
+              wrist: 0.833477

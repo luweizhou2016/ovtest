@@ -1,0 +1,11 @@
+pycocotools
+lpips
+shapely
+nibabel
+sklearn
+crf_beam
+transformers
+pypi-kenlm
+colorama
+tqdm
+scipy

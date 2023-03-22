@@ -1,0 +1,22 @@
+models:
+  - name: ssd_resnet50_v1_fpn_coco
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: COCO2017_detection_91cl_bkgr
+
+        preprocessing:
+          - type: resize
+            size: 640
+        postprocessing:
+          - type: resize_prediction_boxes
+        metrics:
+          - type: coco_precision
+            max_detections: 100
+            reference: 0.387629
+          - type: coco_orig_precision
+            reference: 0.365761
+          - type: map
+            reference: 0.552263

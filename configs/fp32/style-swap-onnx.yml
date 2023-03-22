@@ -1,0 +1,23 @@
+models:
+    - name: style-swap
+      launchers:
+          - framework: openvino
+            inputs:
+                - name:  tensor.1
+                  type: INPUT
+                  value: ".*input*."
+                - name: tensor
+                  type: INPUT
+                  value: ".*style*."
+            adapter: image_processing
+      datasets:
+          - name: style_swap_dataset
+            preprocessing:
+                - type: resize
+                  size: 512
+            metrics:
+                - type: psnr
+                  presenter: print_vector
+                  reference:
+                      mean: 28.31
+                      std: 2.76

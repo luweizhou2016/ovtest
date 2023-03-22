@@ -1,0 +1,58 @@
+models:
+  - name: face-person-detection-retail-0002
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: face_person_detection
+          face_out: detection_out_face
+          person_out: detection_out_pedestrian
+
+    datasets:
+      - name: WiderFace_label_2
+
+        preprocessing:
+          - type: resize
+            dst_width: 544
+            dst_height: 320
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: annotation
+            height_range: 100, 1024
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            prediction_source: detection_out_face
+            reference: 0.885732
+
+      - name: DatatangStreetSubway
+
+        preprocessing:
+          - type: resize
+            dst_width: 544
+            dst_height: 320
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: clip_boxes
+            apply_to: annotation
+            dst_width: 1920
+            dst_height: 1080
+          - type: filter
+            apply_to: annotation
+            height_range: 100, 10000
+            min_visibility: partially occluded
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: False
+            distinct_conf: False
+            prediction_source: detection_out_pedestrian
+            reference: 0.881314

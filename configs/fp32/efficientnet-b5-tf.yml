@@ -1,0 +1,24 @@
+models:
+- name: efficientnet-b5
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2012
+    preprocessing:
+    - type: crop
+      central_fraction: 0.875
+      use_pillow: true
+    - type: resize
+      size: 456
+      use_pillow: true
+      interpolation: BICUBIC
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.8333
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.9667

@@ -1,0 +1,23 @@
+models:
+  - name: adv-inception-v3
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2012_bkgr
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 299
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.77518
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.93752

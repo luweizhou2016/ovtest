@@ -1,0 +1,72 @@
+models:
+  - name: faster_rcnn_inception_resnet_v2_atrous_coco
+
+    launchers:
+
+      - framework: dlsdk
+        tags:
+          - FP32
+        device: CPU
+        tf_model: ModelZoo/model-zoo-models-public/object_detection/common/faster_rcnn/faster_rcnn_inception_resnet_v2_atrous_coco/tf/frozen_inference_graph.pb
+#        model: faster_rcnn_inception_resnet_v2_atrous_coco.xml
+#        weights: faster_rcnn_inception_resnet_v2_atrous_coco.bin
+        adapter: ssd
+        cpu_extensions: AUTO
+        allow_reshape_input: True
+        should_log_mo_cmd: True
+        mo_params:
+          model_name: faster_rcnn_inception_resnet_v2_atrous_coco
+          data_type: FP32
+          input_shape: "[1,600,1024,3]"
+          input: "image_tensor"
+
+          tensorflow_use_custom_operations_config: faster_rcnn_support.json
+
+          tensorflow_object_detection_api_pipeline_config: pipeline.config
+        mo_flags:
+          - reverse_input_channels
+          - keep_shape_ops
+        inputs:
+          - name: image_info
+            type: IMAGE_INFO
+
+
+    datasets:
+      - name: COCO2017
+        #data_source: MSCOCO/val2017
+        data_source: COCO/data/images/val2017/
+        annotation: mscoco_detection.FULL.pickle
+        dataset_meta: mscoco_detection.FULL.json
+        annotation_conversion:
+                converter: mscoco_detection
+                annotation_file: COCO/data/annotations/instances_val2017.json
+                has_background: True
+                use_full_label_map: True
+
+
+        preprocessing:
+            # the following is the emulation of tensorflow's resize from pipeline.config
+            #    image_resizer {
+            #          keep_aspect_ratio_resizer {
+            #                  min_dimension: 600
+            #                  max_dimension: 1024
+            #          }
+            #    }
+          - type: resize
+            aspect_ratio_scale: frcnn_keep_aspect_ratio
+            dst_height: 600
+            dst_width: 1024
+
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            dst_height: 600
+            dst_width: 1024
+
+        metrics:
+          - type: coco_orig_precision
+          - type: coco_precision
+          - type: map
+            integral: 11point
+            ignore_difficult: True
+            presenter: print_scalar

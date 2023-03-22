@@ -1,0 +1,24 @@
+models:
+- name: octave-resnet-200-0.125
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2012
+    reader: opencv_imread
+    preprocessing:
+    - type: resize
+      size: 256
+      aspect_ratio_scale: greater
+      interpolation: CUBIC
+    - type: crop
+      size: 224
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.7999
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.94866

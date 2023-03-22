@@ -1,0 +1,38 @@
+models:
+  - name: unet-2d
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+
+    datasets:
+      - name: unet_5class_validation
+        preprocessing:
+          - type: resize
+            dst_height: 480
+            dst_width: 640            
+
+        postprocessing:
+            - type: resize_segmentation_mask
+              apply_to: annotation
+              dst_height: 480
+              dst_width: 640
+
+        metrics:
+          - type: mean_iou
+            presenter: print_vector
+            reference:
+              background: 0
+              curb: 0.020573
+              enhanced driveable: 0.156117
+              mean: 0.272747
+              non driveable: 0.33558
+              standard driveable: 0.851465
+          - type: mean_accuracy
+            presenter: print_vector
+            reference:
+              curb: 0.020755
+              enhanced driveable: 0.43199
+              mean: 0.448125
+              non driveable: 0.408399
+              standard driveable: 0.931356

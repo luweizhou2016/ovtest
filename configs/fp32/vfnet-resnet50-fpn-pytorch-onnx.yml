@@ -1,0 +1,34 @@
+models:
+    - name: vfnet-resnet50-fpn-pytorch
+      launchers:
+        - framework: dlsdk
+          adapter:
+              type: ssd_onnx
+              bboxes_out: boxes
+              labels_out: labels
+
+      datasets:
+              - name: COCO2017_detection_80cl
+                reader: pillow_imread
+
+                preprocessing:
+                  - type: rgb_to_bgr
+                  - type: resize
+                    dst_width: 1333
+                    dst_height: 800
+                    aspect_ratio_scale: fit_to_window
+
+                  - type: padding
+                    dst_width: 1333
+                    dst_height: 800
+                    pad_type: right_bottom
+                    use_numpy: True
+
+                postprocessing:
+                  - type: resize_prediction_boxes
+                    rescale: True
+
+                metrics:
+                  - type: coco_orig_precision
+                    include_boundaries: False
+                    reference: 0.440273

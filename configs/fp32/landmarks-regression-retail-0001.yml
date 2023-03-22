@@ -1,0 +1,60 @@
+models:
+  - name: landmarks-regression-retail-0001
+
+    launchers:
+      - framework: caffe
+        device: CPU
+        model: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.prototxt
+        weights: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.caffemodel
+        adapter: landmarks_regression
+
+      - framework: dlsdk
+        device: CPU
+        caffe_model: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.prototxt
+        caffe_weights: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.caffemodel
+        adapter: landmarks_regression
+        cpu_extensions: libcpu_extension_avx2.so
+
+      - framework: dlsdk
+        device: GPU
+        caffe_model: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.prototxt
+        caffe_weights: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.caffemodel
+        adapter: landmarks_regression
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        caffe_model: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.prototxt
+        caffe_weights: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.caffemodel
+        adapter: landmarks_regression
+        cpu_extensions: libcpu_extension_avx2.so
+        bitstream: 4-0_A10DK_FP16_MobileNet_SqueezeNet_VGG_ELU.aocx
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        caffe_model: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.prototxt
+        caffe_weights: intel/Retail/object_attributes/landmarks_regression/0001/caffe/LandmarksNet_500000.caffemodel
+        adapter: landmarks_regression
+        cpu_extensions: libcpu_extension_avx2.so
+        bitstream: 4-0_A10DK_FP11_ELU.aocx
+
+    datasets:
+      - name: VGGFace2
+
+        data_source: vgg2face/test
+        annotation: landmark_regression.pickle
+
+        preprocessing:
+          - type: normalization
+            std: 255
+          - type: resize
+            size: 48
+
+        postprocessing:
+          - type: normalize_landmarks_points
+            use_annotation_rect: True
+
+        metrics:
+          - type: per_point_regression
+            presenter: print_vector
+
+          - type: normed_error

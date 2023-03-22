@@ -1,0 +1,48 @@
+models:
+  - name: bert-base-chinese-xnli-zh
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: bert_classification
+          classification_out: loss/cls_logits/Add
+          num_classes: 3
+        inputs:
+          - name: input_ids
+            type: INPUT
+            value: input_ids
+          - name: input_mask
+            type: INPUT
+            value: input_mask
+          - name: segment_ids
+            type: INPUT
+            value: segment_ids
+      - framework: openvino
+        adapter:
+          type: bert_classification
+          classification_out: loss/cls_logits
+          num_classes: 3
+        inputs:
+          - name: input_ids
+            type: INPUT
+            value: input_ids
+          - name: input_mask
+            type: INPUT
+            value: input_mask
+          - name: segment_ids
+            type: INPUT
+            value: segment_ids
+    datasets:
+      - name: XNLI
+
+        reader:
+            type: annotation_features_extractor
+            features:
+                - input_ids
+                - input_mask
+                - segment_ids
+
+        metrics:
+          - name: top1
+            type: accuracy
+            top_k: 1
+            reference: 0.56988

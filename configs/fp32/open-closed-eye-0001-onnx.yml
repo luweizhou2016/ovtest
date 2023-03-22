@@ -1,0 +1,13 @@
+models:
+  - name: open-closed-eye-0001
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+    datasets:
+      - name: MRLEyes_2018_01
+        preprocessing:
+          - type: resize
+            size: 32
+        metrics:
+          - type: accuracy
+            reference: 0.9584

@@ -1,0 +1,14 @@
+models:
+  - name: dna_r9.4.1@v3
+    launchers:
+     - framework: dlsdk
+       adapter:
+         type: dna_seq_crf_beam_search
+    datasets:
+      - name: DNA_r9.4.1_val
+        metrics:
+          - type: dna_seq_accuracy
+            presenter: print_vector
+            reference:
+              mean: 0.97584316
+              median: 0.98198198

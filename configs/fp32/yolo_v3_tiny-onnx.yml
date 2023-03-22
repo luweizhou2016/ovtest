@@ -1,0 +1,45 @@
+models:
+  - name: yolo_v3_tiny
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolo_v3_onnx
+          boxes_out: yolonms_layer_1
+          scores_out: yolonms_layer_1:1
+          indices_out: yolonms_layer_1:2
+        inputs:
+          - name: image_shape
+            type: ORIG_IMAGE_INFO
+
+      - framework: openvino
+        adapter:
+          type: yolo_v3_onnx
+          boxes_out: yolo_evaluation_layer_1/concat_6:0_btc
+          scores_out: yolo_evaluation_layer_1/concat_7:0_btc
+          indices_out: yolonms_layer_1/ExpandDims_5:01
+        inputs:
+          - name: image_shape
+            type: ORIG_IMAGE_INFO
+    datasets:
+      - name: COCO2017_detection_80cl
+        reader: pillow_imread
+        preprocessing:
+          - type: rgb_to_bgr
+          - type: resize
+            size: 416
+            interpolation: BICUBIC
+            use_pillow: True
+            aspect_ratio_scale: fit_to_window
+          - type: padding
+            pad_value: 128, 128, 128
+            size: 416
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+            reference: 0.170668
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
+            reference: 0.136374

@@ -1,0 +1,13 @@
+models:
+    - name: dcgan
+      launchers:
+          - framework: dlsdk
+            adapter: image_processing
+      datasets:
+          - name: DCGAN_pt_dataset
+            metrics:
+                - type: mae
+                  presenter: print_vector
+                  reference:
+                    mean: 66.184604
+                    std: 7.529327

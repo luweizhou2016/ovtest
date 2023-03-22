@@ -1,0 +1,117 @@
+models:
+  - name: mobilenet-ssd
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        backend: OCV
+        model:   object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.prototxt
+        weights: object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 300, 300
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        backend: OCV
+        model:   object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.prototxt
+        weights: object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 300, 300
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        backend: OCV
+        model:   object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.prototxt
+        weights: object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 300, 300
+        adapter: ssd
+
+    datasets:
+      - name: VOC2007_detection
+
+        preprocessing:
+          - type: resize
+            size: 300
+
+          - type: normalization
+            mean: 127.5
+            std:  127.5
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: False
+
+
+  - name: mobilenet-ssd-v1-coco
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        backend: OCV
+        model: object_detection/common/ssd_mobilenet/ssd_mobilenet_v1_coco/tf/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 300, 300
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        backend: OCV
+        model: object_detection/common/ssd_mobilenet/ssd_mobilenet_v1_coco/tf/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 300, 300
+        adapter: ssd
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        backend: OCV
+        model: object_detection/common/ssd_mobilenet/ssd_mobilenet_v1_coco/tf/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 300, 300
+        adapter: ssd
+
+    datasets:
+      - name: COCO2017_detection_91cl_bkgr
+        data_source: MSCOCO
+
+        preprocessing:
+        - type: resize
+          size: 300
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: True
+            presenter: print_scalar
+
+          - type: coco_precision

@@ -1,0 +1,20 @@
+models:
+  - name: resnet50_ssd_gluoncv
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+        inputs:
+          - name: data
+            type: INPUT
+            layout: NHWC
+    datasets:
+      - name: VOC2012_detection_no_bkgr
+        preprocessing:
+          - type: resize
+            size: 512
+        postprocessing:
+          - type: resize_prediction_boxes
+            rescale: True
+        metrics:
+          - type: map
+            reference: 0.9578

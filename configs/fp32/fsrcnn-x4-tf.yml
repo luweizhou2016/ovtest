@@ -1,0 +1,28 @@
+models:
+    - name: fsrcnn-x4
+      launchers:
+          - framework: dlsdk
+            adapter:
+              type: super_resolution
+      datasets:
+        - name: SR_collection
+          preprocessing:
+          - type: resize
+            dst_height: 320
+            dst_width: 180
+          - type: rgb_to_ycrcb
+          - type: select_channel
+            channel: 0
+          postprocessing:
+          - type: sr_image_recovery
+            dst_height: 320
+            dst_width: 180
+            target_color: rgb
+          - type: resize
+            apply_to: prediction
+          metrics:
+            -  type: psnr
+               presenter: print_vector
+               reference:
+                 mean: 24.430101
+                 std: 3.502266

@@ -1,0 +1,16 @@
+models:
+  - name: ssd-resnet101-fpn-oid
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: OpenImagesDataset_v4
+
+        preprocessing:
+          - type: resize
+            size: 512
+
+        metrics:
+          - type: map
+            reference: 0.311735

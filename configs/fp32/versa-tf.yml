@@ -1,0 +1,14 @@
+models:
+  - name: versa
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+            type: classification
+            argmax_output: True
+            block: True
+    datasets:
+      - name: MalwareClassificationDataset
+        metrics:
+          - type: roc_auc_score
+            reference: 0.9233  # cpu ref

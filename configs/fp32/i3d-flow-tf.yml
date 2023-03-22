@@ -1,0 +1,27 @@
+models:
+  - name: i3d-flow
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+        inputs:
+          - name: Placeholder
+            type: INPUT
+            layout: NCDHW
+
+    datasets:
+      - name: Kinetics-400_flows_79_400
+        metrics:
+          - type: clip_accuracy
+            presenter: print_vector
+            reference:
+              clip_accuracy: 0.346667
+              video_accuracy: 0.390977
+              mean: 0.368822
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.346667
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.57

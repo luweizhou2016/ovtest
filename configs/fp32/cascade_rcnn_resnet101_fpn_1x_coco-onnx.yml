@@ -1,0 +1,24 @@
+models:
+    - name: cascade_rcnn_resnet101_fpn_1x_coco
+      launchers:
+          - framework: dlsdk
+            adapter:
+              type: ssd_onnx
+              bboxes_out: boxes
+              labels_out: labels
+      datasets:
+      - name: COCO2017_detection_80cl
+        preprocessing:
+          - type: resize
+            use_pillow: True
+            size: 1024
+
+        postprocessing:
+          - type: resize_prediction_boxes
+            rescale: True
+
+        metrics:
+          - type: coco_precision
+            reference: 0.397309
+          - type: coco_orig_precision
+            reference: 0.393238

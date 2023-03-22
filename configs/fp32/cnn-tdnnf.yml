@@ -1,0 +1,20 @@
+models:
+    - name: cnn-tdnnf
+      launchers:
+          - framework: dlsdk
+            adapter: kaldi_feat_regression
+      datasets:
+        - name: CNN-TDNNF_CMVN_feats
+          reader:
+            type: kaldi_ark_reader
+          preprocessing:
+              - type: context_window
+                cw_l: 30
+                cw_r: 30
+                to_multi_infer: True
+          metrics:
+              - type: mae
+                presenter: print_vector
+                reference:
+                  mean: 14.369781
+                  std: 0.201738

@@ -1,0 +1,60 @@
+models:
+  - name: yolo_v2
+
+    launchers:
+      - framework: caffe
+        device: CPU
+        model:   intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.prototxt
+        weights: intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.caffemodel
+        adapter: yolo_v2
+
+      - framework: dlsdk
+        device: CPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.caffemodel
+        cpu_extensions: libcpu_extension.so
+        adapter: yolo_v2
+
+      - framework: dlsdk
+        device: GPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.caffemodel
+        adapter: yolo_v2
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v2/caffe/yolo_v2.caffemodel
+        adapter: yolo_v2
+        cpu_extensions: libcpu_extension.so
+        bitstream: 0-8-1_a10dk_fp16_8x24_arch13.aocx
+
+    datasets:
+      - name: VOC2007val
+
+        data_source: VOCdevkit/VOC2007/JPEGImages
+        annotation: voc07.pickle
+        dataset_meta: voc07.json
+
+        preprocessing:
+          - type: normalization
+            std: 255.0
+          - type: resize
+            size: 416
+
+        postprocessing:
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.005
+          - type: correct_yolo_v2_boxes
+            size: 416
+          - type: nms
+            overlap: 0.45
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            presenter: print_vector
+            integral: 11point
+            ignore_difficult: False

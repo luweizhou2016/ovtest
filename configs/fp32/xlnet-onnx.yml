@@ -1,0 +1,28 @@
+models:
+    - name: xlnet
+      launchers:
+          - framework: dlsdk
+            adapter:
+                type: reid
+                target_out: "output_0"
+                keep_shape: True
+            inputs:
+                -   name: "input_ids"
+                    type: INPUT
+                    value: "input_ids"
+                -   name: "attention_mask"
+                    type: INPUT
+                    value: "input_mask"
+      datasets:
+          - name: STS-B_test_xlnet_padded
+            postprocessing:
+              - type: sentence_similarity_pooling
+            metrics:
+                - type: spearman_correlation_coef
+                  similarity_distance: cosine
+                  name: spearman@cosine
+                  reference: 0.3064
+                - type: pearson_correlation_coef
+                  similarity_distance: cosine
+                  name: pearson@cosine
+                  reference: 0.305765

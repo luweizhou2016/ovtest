@@ -1,0 +1,27 @@
+models:
+  - name: faceboxes
+
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: WiderFace_label_1
+
+        preprocessing:
+          - type: resize
+            dst_width: 1024
+            dst_height: 1024
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: annotation
+            height_range: 100
+            is_empty: True
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            reference: 0.851794

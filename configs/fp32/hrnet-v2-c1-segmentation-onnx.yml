@@ -1,0 +1,29 @@
+models:
+  - name: hrnet-v2-c1-segmentation
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+
+    datasets:
+      - name: ADEChallengeData2016
+        preprocessing:
+          - type: resize
+            size: 320
+            use_pillow: True
+            interpolation: BILINEAR
+        postprocessing:
+          - type: resize_segmentation_mask
+            apply_to: prediction
+          - type: shift
+            apply_to: annotation
+            shift_value: -1
+        metrics:
+          - name: pix_accuracy
+            type: segmentation_accuracy
+            use_argmax: True
+            reference: 0.7769
+          - name: mean_IoU
+            type: mean_iou
+            use_argmax: True
+            reference: 0.3302

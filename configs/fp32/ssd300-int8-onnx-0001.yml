@@ -1,0 +1,23 @@
+models:
+  - name: ssd300-int8-onnx-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: VOC2007_detection
+
+        preprocessing:
+          - type: resize
+            size: 300
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: True
+            presenter: print_scalar
+            reference: 0.776304

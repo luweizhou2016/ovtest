@@ -1,0 +1,24 @@
+models:
+  - name: gpt2-wikitext2-int8-onnx-0001
+    launchers:
+      - framework: dlsdk
+        adapter:
+            type: common_language_modeling
+            logits_output: "3695"
+        inputs:
+          - name: "result.1"
+            type: INPUT
+            value: "input_ids"
+            precision: I32
+
+    datasets:
+      - name: WikiText_2_raw_gpt2
+
+        reader:
+          type: annotation_features_extractor
+          features:
+          - input_ids
+        metrics:
+          - type: 'perplexity'
+            name: 'Perplexity'
+            reference: 0.209361

@@ -1,0 +1,25 @@
+models:
+  - name: efficientdet-d0
+
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+    datasets:
+      - name: COCO2017_detection_91cl
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            size: 512
+          - type: padding
+            size: 512
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            size: 512
+          - type: shift_labels
+            offset: 1
+
+        metrics:
+          - type: coco_precision
+            reference: 0.3195

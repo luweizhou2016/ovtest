@@ -1,0 +1,25 @@
+models:
+- name: face-detection-adas-0001
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+
+  datasets:
+  - name: WiderFace_label_1
+
+    preprocessing:
+    - type: resize
+      dst_width: 672
+      dst_height: 384
+    postprocessing:
+    - type: resize_prediction_boxes
+    - type: filter
+      height_range: 100
+      apply_to: annotation
+    metrics:
+    - type: map
+      ignore_difficult: true
+      include_boundaries: false
+      allow_multiple_matches_per_ignored: true
+      use_filtered_tp: true
+      reference: 0.941

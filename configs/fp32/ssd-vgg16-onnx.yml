@@ -1,0 +1,22 @@
+models:
+  - name: ssd-vgg16
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ssd_multilabel
+          scores_out: confidence
+          boxes_out: boxes
+
+    datasets:
+      - name: VOC2012_detection
+        preprocessing:
+          - type: resize
+            size: 300
+        postprocessing:
+          - type: resize_prediction_boxes
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: True
+            presenter: print_scalar
+            reference: 0.869143

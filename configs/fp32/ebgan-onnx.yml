@@ -1,0 +1,13 @@
+models:
+    - name: ebgan
+      launchers:
+          - framework: dlsdk
+            adapter: image_processing
+      datasets:
+          - name: EBGAN_dataset
+            metrics:
+                - type: mae
+                  presenter: print_vector
+                  reference:
+                    mean: 47.469652
+                    std: 11.507539

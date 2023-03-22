@@ -1,0 +1,31 @@
+models:
+    - name: tedlium_lstm4f
+      launchers:
+        - framework: dlsdk
+          adapter:
+            type: kaldi_latgen_faster_mapped
+            words_file: tedlium_lstm4f/words.txt
+            fst_file: tedlium_lstm4f/HCLG.fst
+            transition_model_file: tedlium_lstm4f/final.mdl
+            beam: 13
+            lattice_beam: 8
+            acoustic_score: 0.1
+            allow_partial: True
+            min_active: 200
+            max_active: 7000
+            inverse_acoustic_scale: 11.0
+          reset_memory_state: true
+          device_config:
+            GNA:
+              GNA_SCALE_FACTOR: "4348.26"
+      datasets:
+          - name: kaldi_tedlium_lstm4f_feats
+            metrics:
+                - type: wer
+                  abs_threshold: 0.64
+                  rel_threshold: 0.00001
+                  reference: 0.166509
+                - type: ser
+                  rel_threshold: 0.00001
+                  reference: 0.85974
+

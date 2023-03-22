@@ -1,0 +1,58 @@
+models:
+  - name: tiny_yolo_v1
+
+    launchers:
+      - framework: caffe
+        device: CPU
+        model:   intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.prototxt
+        weights: intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.caffemodel
+        adapter: tiny_yolo_v1
+
+      - framework: dlsdk
+        device: CPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.caffemodel
+        adapter: tiny_yolo_v1
+
+      - framework: dlsdk
+        device: GPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.caffemodel
+        adapter: tiny_yolo_v1
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        caffe_model:   intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.prototxt
+        caffe_weights: intel/PublicInHouse/object_detection/common/yolo/v1_tiny/caffe/tiny_yolo_v1.caffemodel
+        adapter: tiny_yolo_v1
+        bitstream: 2-0-1_A10DK_FP16_TinyYolo.aocx
+
+    datasets:
+      - name: VOC2007val
+
+        data_source: VOCdevkit/VOC2007/JPEGImages
+        annotation: voc07.pickle
+        dataset_meta: voc07.json
+
+        preprocessing:
+          - type: normalization
+            std: 255.0
+          - type: resize
+            size: 448
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: True
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            presenter: print_vector
+            integral: 11point
+            ignore_difficult: False

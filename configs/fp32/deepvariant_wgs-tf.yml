@@ -1,0 +1,24 @@
+models:
+  - name: deepvariant_wgs
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: classification
+          block: True
+          label_as_array: True
+        inputs:
+        - name: "InceptionV3/InceptionV3/Conv2d_1a_3x3/ReadVariableOp"
+          type: INPUT
+          layout: "NCHW"
+    datasets:
+      - name: DeepVariant_WGS
+        reader:
+          type: numpy_reader
+        preprocessing:
+          - type: normalization
+            std: 128
+            mean: 128
+        metrics:
+          - type: 'accuracy'
+            match: True
+            reference: 0.99334

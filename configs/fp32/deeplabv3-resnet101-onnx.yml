@@ -1,0 +1,26 @@
+models:
+  - name: deeplabv3-resnet101
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: segmentation
+          make_argmax: true
+
+    datasets:
+      - name: COCO2017_segm_with_VOC_labels
+        preprocessing:
+            - type: resize
+              size: 520
+        postprocessing:
+            - type: resize_segmentation_mask
+              apply_to: annotation
+              size: 520
+        metrics:
+            - type: mean_iou
+              use_argmax: false
+              presenter: print_scalar
+              reference: 0.6731
+            - type: segmentation_accuracy
+              use_argmax: false
+              presenter: print_scalar
+              reference: 0.9207

@@ -1,0 +1,3 @@
+CPU:
+    ENFORCE_BF16: "NO"
+    NUM_STREAMS: 1

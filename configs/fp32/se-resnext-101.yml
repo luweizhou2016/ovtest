@@ -1,0 +1,66 @@
+models:
+  - name: SE-ResNext-101
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   classification/se-networks/se-resnext-101/caffe/se-resnext-101.prototxt
+        weights: classification/se-networks/se-resnext-101/caffe/se-resnext-101.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   classification/se-networks/se-resnext-101/caffe/se-resnext-101.prototxt
+        weights: classification/se-networks/se-resnext-101/caffe/se-resnext-101.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   classification/se-networks/se-resnext-101/caffe/se-resnext-101.prototxt
+        weights: classification/se-networks/se-resnext-101/caffe/se-resnext-101.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2015
+        data_source: ImageNet
+
+        preprocessing:
+        - type: resize
+          size: 256
+          aspect_ratio_scale: greater
+
+        - type: crop
+          size: 224
+
+        - type: normalization
+          mean: 104, 117, 123
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

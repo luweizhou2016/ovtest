@@ -1,0 +1,31 @@
+models:
+  - name: resnest-101-pytorch
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2012
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 293
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+          - type: crop
+            use_pillow: True
+            size: 256
+          - type: rgb_to_bgr
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.8283
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9628

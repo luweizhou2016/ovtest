@@ -1,0 +1,30 @@
+models:
+  - name: resnet18-dorefa-binary-onnx-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2012
+        data_source: ImageNet
+        reader: pillow_imread
+
+        preprocessing:
+        - type: resize
+          size: 256
+          aspect_ratio_scale: greater
+          use_pillow: True
+          interpolation: BILINEAR
+        - type: crop
+          size: 224
+          use_pillow: True
+        - type: bgr_to_rgb
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

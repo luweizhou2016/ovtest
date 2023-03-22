@@ -1,0 +1,26 @@
+models:
+  - name: pp-ocr-rec
+    launchers:
+      - framework: dlsdk
+        adapter:
+            type: ppocr
+            vocabulary_file: ppocr/ppocr_keys_v1.txt
+        allow_reshape_input: True
+
+    datasets:
+      - name: RCTW_recognition
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: ppcrnn_ratio
+            dst_height: 32
+            dst_width: 320
+          - type: padding
+            dst_height: 32
+            dst_width: 320
+            pad_type: right_bottom
+            use_numpy: True
+
+        metrics:
+          - type: character_recognition_accuracy
+            remove_spaces: True
+            reference: 0.389711

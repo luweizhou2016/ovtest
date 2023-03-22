@@ -1,0 +1,24 @@
+models:
+    - name: distilbert-base-uncased
+      launchers:
+          - framework: dlsdk
+            adapter:
+                type: reid
+                keep_shape: True
+            inputs:
+                -   name: "input.1"
+                    type: INPUT
+                    value: "input_ids"
+      datasets:
+          - name: STS-B_test_distilbert_uncased_padded
+            postprocessing:
+              - type: sentence_similarity_pooling
+            metrics:
+                - type: spearman_correlation_coef
+                  similarity_distance: cosine
+                  name: spearman@cosine
+                  reference: 0.568607
+                - type: pearson_correlation_coef
+                  similarity_distance: cosine
+                  name: pearson@cosine
+                  reference: 0.564829

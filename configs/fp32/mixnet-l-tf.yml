@@ -1,0 +1,28 @@
+models:
+  - name: mixnet-l
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2012
+
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+            use_pillow: True
+          - type: resize
+            size: 224
+            use_pillow: True
+            interpolation: BICUBIC
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.783
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.9391

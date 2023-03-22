@@ -1,0 +1,33 @@
+models:
+- name: faster_rcnn_resnet50_fpn_coco
+  launchers:
+  - framework: dlsdk
+    adapter:
+      type: faster_rcnn_onnx
+      boxes_out: '6379'
+      labels_out: '6381'
+      scores_out: '6383'
+    inputs:
+      - name: im_info
+        type: IMAGE_INFO
+  datasets:
+  - name: COCO2017_detection_80cl_bkgr
+    reader: pillow_imread
+    preprocessing:
+    - type: resize
+      use_pillow: True
+      aspect_ratio_scale: fit_to_window
+      dst_height: 800
+      dst_width: 800
+    - type: rgb_to_bgr
+    - type: padding
+      dst_height: 800
+      dst_width: 800
+      pad_type: right_bottom
+    metrics:
+    - type: coco_orig_precision
+      reference: 0.3458
+    - type: coco_precision
+      reference: 0.3342
+    - type: map
+      reference: 0.5486

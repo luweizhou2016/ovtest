@@ -1,0 +1,15 @@
+models:
+  - name: deeplab-v3p-resnet50-os8
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: segmentation
+
+    datasets:
+      - name: Cityscapes_19cl
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            ignore_label: 19
+            presenter: print_scalar
+            reference: 0.8036

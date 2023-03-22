@@ -1,0 +1,32 @@
+models:
+  - name: attention-ocr
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+            type: aocr
+            eos_index: 2
+            output_blob: transpose_1
+            labels: ['', '', '', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+    datasets:
+      - name: ICDAR2013_recognition
+
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            dst_width: 86
+            dst_height: 32
+            interpolation: BICUBIC
+            use_pillow: True
+          - type: bgr_to_gray
+          - type: padding
+            pad_type: right_bottom
+            dst_width: 86
+            dst_height: 32
+
+        metrics:
+          - type: label_level_recognition_accuracy
+            reference: 0.794101
+          - type: character_recognition_accuracy
+            reference: 0.552709

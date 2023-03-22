@@ -1,0 +1,54 @@
+models:
+  - name: ssd_mobilenet_v2_coco
+
+    launchers:
+
+      - framework: dlsdk
+        tags:
+          - FP32
+        device: CPU
+        tf_model: ModelZoo/model-zoo-models-public/object_detection/common/ssd_mobilenet/ssd_mobilenet_v2_coco/tf/frozen_inference_graph.pb
+#        model: frozen_inference_graph.xml
+#        weights: frozen_inference_graph.bin
+        adapter: ssd
+        cpu_extensions: AUTO
+        mo_params:
+          data_type: FP32
+          input_shape: [1,300,300,3]
+          input: image_tensor
+          output: detection_classes,detection_scores,detection_boxes,num_detections
+          tensorflow_use_custom_operations_config: ssd_v2_support.json
+          tensorflow_object_detection_api_pipeline_config: pipeline.config
+        mo_flags:
+          - reverse_input_channels
+
+
+    datasets:
+      - name: COCO2017
+        #data_source: MSCOCO/val2017
+        data_source: COCO/data/images/val2017/
+        annotation: mscoco_detection.FULL.pickle
+        dataset_meta: mscoco_detection.FULL.json
+        annotation_conversion:
+                converter: mscoco_detection
+                annotation_file: COCO/data/annotations/instances_val2017.json
+                has_background: True
+                use_full_label_map: True
+
+
+        preprocessing:
+          - type: resize
+            size: 300
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: coco_orig_precision
+          - type: coco_precision
+          - type: map
+            integral: 11point
+            ignore_difficult: True
+            presenter: print_scalar
+
+

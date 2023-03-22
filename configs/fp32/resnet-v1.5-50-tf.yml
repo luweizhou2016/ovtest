@@ -1,0 +1,22 @@
+models:
+  - name: resnet-v1.5-50
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+    datasets:
+      - name: ImageNet2012_bkgr
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+        metrics:
+          - name: top1
+            type: accuracy
+            top_k: 1
+            reference: 0.76442
+          - name: top5
+            type: accuracy
+            top_k: 5
+            reference: 0.93074

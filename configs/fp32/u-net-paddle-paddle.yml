@@ -1,0 +1,36 @@
+models:
+  - name: u-net-paddle
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: true
+        adapter:
+          type: segmentation
+
+    datasets:
+      - name: Cityscapes_19cl
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            ignore_label: 19
+            presenter: print_vector
+            reference:
+              bicycle: 0.727241
+              building: 0.896701
+              bus: 0.564195
+              car: 0.919364
+              fence: 0.469276
+              mean: 0.649966
+              motorcycle: 0.432823
+              person: 0.760134
+              pole: 0.596825
+              rider: 0.457524
+              road: 0.968648
+              sidewalk: 0.776004
+              sky: 0.935673
+              terrain: 0.58099
+              traffic light: 0.64869
+              traffic sign: 0.740647
+              train: 0.272234
+              truck: 0.321489
+              vegetation: 0.915872
+              wall: 0.365022

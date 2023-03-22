@@ -1,0 +1,34 @@
+models:
+- name: person-vehicle-bike-detection-crossroad-1016
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+  datasets:
+  - name: Crossroad_new
+
+    preprocessing:
+    - type: resize
+      dst_width: 512
+      dst_height: 512
+    postprocessing:
+    - type: resize_prediction_boxes
+    - type: cast_to_int
+    - type: filter
+      apply_to: annotation
+      area_ratio: 0.034722222222222224
+    - type: filter
+      apply_to: prediction
+      min_confidence: 0.05
+      is_empty: true
+    metrics:
+    - type: map
+      presenter: print_vector
+      ignore_difficult: true
+      include_boundaries: true
+      allow_multiple_matches_per_ignored: true
+      use_filtered_tp: false
+      reference:
+        mean: 0.6255
+        non-vehicle: 0.3618
+        person: 0.7363
+        vehicle: 0.7784

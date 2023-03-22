@@ -1,0 +1,19 @@
+models:
+  - name: NiftyNet
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: regression
+          keep_shape: True
+    datasets:
+      - name: Pancreas-CT
+        reader:
+          type: nifti_reader
+          multi_frame: True
+          channels_first: True
+        preprocessing:
+          - type: normalize3d
+        metrics:
+          - type: mae
+          - type: rmse
+

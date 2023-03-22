@@ -1,0 +1,27 @@
+models:
+- name: vehicle-detection-adas-0002
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+  datasets:
+  - name: VehicleDetectionDataset
+
+    preprocessing:
+    - type: resize
+      dst_width: 672
+      dst_height: 384
+    postprocessing:
+    - type: resize_prediction_boxes
+    - type: cast_to_int
+    - type: filter
+      apply_to: annotation
+      height_range: 30
+      is_empty: true
+    metrics:
+    - type: map
+      integral: 11point
+      ignore_difficult: true
+      include_boundaries: true
+      allow_multiple_matches_per_ignored: true
+      use_filtered_tp: true
+      reference: 0.906

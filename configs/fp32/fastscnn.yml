@@ -1,0 +1,26 @@
+models:
+  - name: FastSCNN
+    launchers:
+      - framework: paddle_paddle
+        adapter:
+          type: segmentation
+
+      - framework: dlsdk
+        adapter:
+          type: segmentation
+
+    datasets:
+      - name: cityscapes
+        preprocessing:
+            - type: bgr_to_rgb
+            - type: normalization
+              std: 255
+            - type: normalization
+              mean: 0.5
+              std: 0.5
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            ignore_label: 19
+            presenter: print_vector
+

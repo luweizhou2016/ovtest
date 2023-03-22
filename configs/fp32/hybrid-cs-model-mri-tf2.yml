@@ -1,0 +1,20 @@
+models:
+  - name: hybrid-cs-model-mri
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: image_processing
+          std: 1
+          cast_to_uint8: False
+
+    datasets:
+      - name: Calgary_Campinas_Single_Channel
+        postprocessing:
+          - type: interpolation
+        metrics:
+          - type: psnr
+            presenter: print_vector
+            reference:
+              mean: 34.272884
+              std: 4.607115

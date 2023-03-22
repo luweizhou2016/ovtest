@@ -1,0 +1,14 @@
+models:
+    - name: semantic-segmentation-0001
+      launchers:
+          - framework: dlsdk
+            adapter:
+              type: segmentation
+
+      datasets:
+          - name: Cityscapes_19cl
+            metrics:
+              - type: mean_iou
+                use_argmax: false
+                ignore_label: 19
+                reference: 0.719216

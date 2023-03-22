@@ -1,0 +1,31 @@
+models:
+    - name: rm_lstm4f
+      launchers:
+        - framework: dlsdk
+          adapter:
+            type: kaldi_latgen_faster_mapped
+            words_file: rm_lstm4f/words.txt
+            fst_file: rm_lstm4f/HCLG.fst
+            transition_model_file: rm_lstm4f/final.mdl
+            beam: 30
+            lattice_beam: 18
+            acoustic_score: 0.1
+            allow_partial: True
+            min_active: 200
+            max_active: 7000
+            inverse_acoustic_scale: 4.0
+          reset_memory_state: true
+          device_config:
+            GNA:
+              GNA_SCALE_FACTOR: "3050.79"
+      datasets:
+          - name: kaldi_rm_lstm4f_feats
+            metrics:
+                - type: wer
+                  abs_threshold: 0.07
+                  rel_threshold: 0.00001
+                  reference: 0.022341
+                - type: ser
+                  rel_threshold: 0.00001
+                  reference: 0.14726
+

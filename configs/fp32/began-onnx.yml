@@ -1,0 +1,13 @@
+models:
+    - name: began
+      launchers:
+          - framework: dlsdk
+            adapter: image_processing
+      datasets:
+          - name: BEGAN_dataset
+            metrics:
+                - type: mae
+                  presenter: print_vector
+                  reference:
+                    mean: 43.574491
+                    std: 11.022485
