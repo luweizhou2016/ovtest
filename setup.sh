@@ -18,13 +18,18 @@ mkdir -p extern
 cd extern
 
 mkdir -p cv_bench_cache
-sudo mount -t nfs 10.91.242.212:/data/cv_bench_cache ./cv_bench_cache
+sudo mount -t nfs -o ro 10.91.242.212:/data/cv_bench_cache ./cv_bench_cache
 
-mkdir nfs_share_data
-sudo mount -t nfs 10.67.107.130:/home/share nfs_share_data
+mkdir -p omz-validation-datasets
+sudo mount -t nfs -o ro 10.91.242.212:/data/nn_icv_cv_externalN/omz-validation-datasets ./omz-validation-datasets
 
-mkdir nfs_share_models
-sudo mount -t nfs 10.67.108.173:/home/vsi/nfs_share nfs_share_models
+#mkdir nfs_share_data
+#sudo mount -t nfs -o ro 10.67.107.130:/home/share nfs_share_data
+
+#mkdir nfs_share_models
+#sudo mount -t nfs 10.67.108.173:/home/vsi/nfs_share nfs_share_models
+
+
 
 python3 -m virtualenv ./venv
 . ./venv/bin/activate

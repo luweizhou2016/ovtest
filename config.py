@@ -12,7 +12,7 @@ definitions_file = []
 #definitions_file.append(base_path.joinpath("external_tools/frameworks.ai.openvino.accuracy-checker-configs/configs/omz_validation/datasets_definitions.yml"))
 definitions_file.append("./extern/annotation_converters_ext/calibration_definitions.yml")
 
-data_source=base_path.joinpath("./extern/nfs_share_data/omz-validation-datasets/")
+data_source=base_path.joinpath("./extern/omz-validation-datasets/")
 
 model_attributes=f"{data_source}/model_attributes"
 

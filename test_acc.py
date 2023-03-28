@@ -199,12 +199,19 @@ def compare_acc_results(ref_log_path, tgt_log_path, args, rel_warn_thr = 0.2):
             print(f"({E}) {key_msg} [{i}/{N}] {model}  {description} ")
 
 if __name__ == "__main__":
+
+    def infer_prec(prec):
+        if prec == "bf16" or prec == "f16" or prec == "f32":
+            return prec
+        else:
+            raise Exception(f"unsupported inference precision: {prec}")
+
     parser = argparse.ArgumentParser(description=f"Test accuracy")
     parser.add_argument("-f", "--name_filter", type=str, help="target model name filter", default="")
     parser.add_argument("-s", "--subset", type=int, help="subset size", default=0)
-    parser.add_argument("--bf16", action="store_true")
+    parser.add_argument("--prec", type=infer_prec, default="f32")
     parser.add_argument("--eg", action="store_true")
-    parser.add_argument("--model_list", type=str, default="int8_models/ww06_list.txt")
+    parser.add_argument("-l", "--model_list", type=str, default="int8_models/ww06_list.txt")
     parser.add_argument("-d", "--data-source", type=str, default=utils.data_source)
     parser.add_argument("--cmp", nargs="+")
     parser.add_argument("-v", "--verbose", action="count", default=0)
@@ -231,10 +238,7 @@ if __name__ == "__main__":
             compare_acc_results(args.cmp[0], args.cmp[1], args)
         sys.exit(0)
 
-    if args.bf16:
-        device_config_path = "device_config_bf16.yml"
-    else:
-        device_config_path = "device_config_f32.yml"
+    device_config_path = f"device_config_{args.prec}.yml"
 
     if args.subset > 0:
         ACCCFG = f" --shuffle False -ss {args.subset}"
@@ -286,8 +290,7 @@ if __name__ == "__main__":
             org_model = core.read_model(mpath)
             configs = {}
             configs["NUM_STREAMS"] = 1
-            if args.bf16:
-                configs["ENFORCE_BF16"] = "YES"
+            configs["INFERENCE_PRECISION_HINT"] = args.prec
             compiled_model = core.compile_model(org_model, "CPU", configs)
             serialize(compiled_model.get_runtime_model(), exec_graph_fname)
 
