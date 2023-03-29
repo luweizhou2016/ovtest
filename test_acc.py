@@ -216,6 +216,7 @@ if __name__ == "__main__":
     parser.add_argument("--cmp", nargs="+")
     parser.add_argument("-v", "--verbose", action="count", default=0)
     parser.add_argument("--tag", type=str, default=None)
+    parser.add_argument("-p", "--pc", action="count", default=0)
 
     args = parser.parse_args()
 
@@ -250,6 +251,10 @@ if __name__ == "__main__":
 
     if args.verbose > 0:
         os.environ["OV_CPU_DEBUG_LOG"] = "-"
+        os.environ["ONEDNN_VERBOSE"] = "2"
+
+    if args.pc > 0:
+        os.environ["OV_CPU_SUMMARY_PERF"] = "1"
 
     # ensure annotations folder exist
     os.system(f"mkdir -p {utils.annotations}")

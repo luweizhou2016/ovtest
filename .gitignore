@@ -2,7 +2,7 @@
 *.csv
 *.xml
 *.bin
-*.txt
 *.pyc
 
+openvino/
 extern/
