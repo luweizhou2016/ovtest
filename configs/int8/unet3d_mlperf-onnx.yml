@@ -1,0 +1,20 @@
+models:
+  - name: unet3d_mlperf
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: brain_tumor_segmentation
+          segmentation_out: output
+
+    datasets:
+      - name: BraTS2019
+        postprocessing:
+          - type: remove_brats_prediction_padding
+            make_argmax: True
+        metrics:
+          - type: dice_unet3d
+            presenter: print_vector
+            reference:
+              mean@whole tumor: 0.91407
+              mean@tumor core: 0.86792
+              mean@enhancing tumor: 0.77699

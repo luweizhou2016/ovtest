@@ -1,0 +1,23 @@
+models:
+    - name: wdsr-small-x4
+      launchers:
+          - framework: dlsdk
+            adapter:
+              type: super_resolution
+              reverse_channels: True
+      datasets:
+        - name: SR_collection
+          preprocessing:
+              - type: rgb_to_bgr
+              - type: resize
+                dst_height: 240
+                dst_width: 135
+          postprocessing:
+              - type: resize
+                apply_to: prediction
+          metrics:
+            -  type: psnr
+               presenter: print_vector
+               reference:
+                 mean: 23.185542
+                 std: 2.939226

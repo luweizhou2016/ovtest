@@ -1,0 +1,27 @@
+models:
+- name: se-resnext-50
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2012
+    reader: pillow_imread
+    preprocessing:
+    - type: bgr_to_rgb
+    - type: resize
+      size: 256
+      aspect_ratio_scale: greater
+      use_pillow: true
+      interpolation: BILINEAR
+    - type: crop
+      size: 224
+      use_pillow: true
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.7908
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.9443

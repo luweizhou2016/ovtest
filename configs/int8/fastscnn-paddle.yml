@@ -1,0 +1,35 @@
+models:
+  - name: fastscnn
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: segmentation
+
+    datasets:
+      - name: Cityscapes_19cl
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            ignore_label: 19
+            presenter: print_vector
+            reference:
+              bicycle: 0.680873
+              building: 0.903756
+              bus: 0.745804
+              car: 0.925342
+              fence: 0.51394
+              mean: 0.693106
+              motorcycle: 0.408312
+              person: 0.740434
+              pole: 0.551055
+              rider: 0.489897
+              road: 0.974998
+              sidewalk: 0.800788
+              sky: 0.938078
+              terrain: 0.603109
+              traffic light: 0.570973
+              traffic sign: 0.685843
+              train: 0.641081
+              truck: 0.640945
+              vegetation: 0.911618
+              wall: 0.442177

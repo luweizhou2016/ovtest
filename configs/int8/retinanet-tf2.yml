@@ -1,0 +1,51 @@
+models:
+  - name: retinanet
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: retinanet_tf2
+          boxes_outputs:
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_4/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_3/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_2/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_1/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd/Add
+
+          class_outputs:
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_4/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_3/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_2/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_1/Add
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd/Add
+      - framework: openvino
+        adapter:
+          type: retinanet_tf2
+          boxes_outputs:
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_4
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_3
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_2
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd_1
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/box-predict/BiasAdd
+
+          class_outputs:
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_4
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_3
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_2
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd_1
+            - StatefulPartitionedCall/StatefulPartitionedCall/retinanet/class-predict/BiasAdd
+    datasets:
+      - name: COCO2017_detection_91cl_bkgr
+        preprocessing:
+          - type: resize
+            size: 640
+            aspect_ratio_scale: fit_to_window
+            use_pillow: True
+          - type: padding
+            size: 640
+            pad_type: right_bottom
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+        metrics:
+          - type: coco_precision
+            max_detections: 100
+            reference: 0.3316

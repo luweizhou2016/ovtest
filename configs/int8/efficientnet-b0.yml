@@ -1,0 +1,24 @@
+models:
+- name: efficientnet-b0
+  launchers:
+  - framework: dlsdk
+    tags:
+    - FP16-INT8
+    adapter: classification
+  datasets:
+  - name: imagenet_1000_classes
+    preprocessing:
+    - type: crop
+      central_fraction: 0.875
+      use_pillow: true
+    - type: resize
+      size: 224
+      use_pillow: true
+      interpolation: BICUBIC
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5

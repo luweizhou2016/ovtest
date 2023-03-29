@@ -1,0 +1,22 @@
+models:
+  - name: mobilenet-v3-large-1.0-224
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: ImageNet2012
+        preprocessing:
+        - type: crop_image_with_padding
+          size: 224
+          crop_padding: 32
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 0.75846
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 0.92718

@@ -1,0 +1,43 @@
+models:
+- name: se-resnext-101-cf
+  launchers:
+  - framework: caffe
+    model: public/se-resnext-101/se-resnext-101.prototxt
+    weights: public/se-resnext-101/se-resnext-101.caffemodel
+    adapter: classification
+  datasets:
+  - name: imagenet_1000_classes_2015
+    preprocessing:
+    - type: resize
+      size: 256
+    - type: crop
+      size: 224
+    - type: normalization
+      mean: 104, 117, 123
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+- name: se-resnext-101
+  launchers:
+  - framework: dlsdk
+    tags:
+    - INT8
+    adapter: classification
+  datasets:
+  - name: imagenet_1000_classes_2015
+    preprocessing:
+    - type: resize
+      size: 256
+    - type: crop
+      size: 224
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5

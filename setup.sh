@@ -29,6 +29,8 @@ sudo mount -t nfs -o ro 10.91.242.212:/data/nn_icv_cv_externalN/omz-validation-d
 #mkdir nfs_share_models
 #sudo mount -t nfs 10.67.108.173:/home/vsi/nfs_share nfs_share_models
 
+ln -sf `realpth ./cv_bench_cache/ww06_weekly_23.0-9585-ab509ce1645-API2.0_int8` ww06_weekly_23.0-9585-ab509ce1645-API2.0_int8
+ln -sf `realpth ./cv_bench_cache/ww09_weekly_23.0.0-9828-4fd38844a28-API2.0` ww09_weekly_23.0.0-9828-4fd38844a28-API2.0
 
 
 python3 -m virtualenv ./venv

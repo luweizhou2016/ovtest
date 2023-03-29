@@ -1,0 +1,43 @@
+models:
+- name: squeezenet1.1-cf
+  launchers:
+  - framework: caffe
+    model: public/squeezenet1.1/squeezenet1.1.prototxt
+    weights: public/squeezenet1.1/squeezenet1.1.caffemodel
+    adapter: classification
+  datasets:
+  - name: imagenet_1000_classes
+    preprocessing:
+    - type: resize
+      size: 256
+    - type: crop
+      size: 227
+    - type: normalization
+      mean: 104, 117, 123
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+- name: squeezenet1.1
+  launchers:
+  - framework: dlsdk
+    tags:
+    - INT8
+    adapter: classification
+  datasets:
+  - name: imagenet_1000_classes
+    preprocessing:
+    - type: resize
+      size: 256
+    - type: crop
+      size: 224
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5

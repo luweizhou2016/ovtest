@@ -1,0 +1,36 @@
+models:
+  - name: srgan
+    launchers:
+      - framework: dlsdk
+        tf_model: g_srgan.frozen.pb
+        adapter:
+          type: super_resolution
+          reverse_channels: True
+          scale: 127.5
+          mean: 127.5
+        mo_params:
+          input_shape: [1, 339, 510, 3]
+          mean_values: [127.5, 127.5, 127.5]
+          scale: 127.5
+        mo_flags:
+          - reverse_input_channels
+
+    datasets:
+      - name: DIV2K_x4
+        data_source: DIV2K/DIV2K_valid_HR
+        annotation_conversion:
+          converter: super_resolution
+          data_dir: DIV2K/DIV2K_valid_HR
+          lr_suffix: x4
+          hr_suffix: ''
+
+        preprocessing:
+          - type: resize
+            dst_width: 510
+            dst_height: 339
+        postprocessing:
+          - type: resize_super_resolution
+
+        metrics:
+         - type: psnr
+           presenter: print_vector

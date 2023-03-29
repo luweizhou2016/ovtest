@@ -1,0 +1,25 @@
+models:
+  - name: Sharpen-LensBlur
+    launchers:
+      - framework: dlsdk
+        adapter:
+            type: image_processing
+    
+    datasets:
+
+      - name: SharpenLensBlurDataset_lpips
+        preprocessing:
+          - type: normalization
+            std: 255
+            images_only: true
+
+
+        metrics:
+          - type: lpips
+            presenter: print_vector
+            color_order: BGR
+            distance_threshold: 0.1
+            reference:
+              mean: 0.292442
+              ratio_greater_0.1: 0.904333
+              std: 0.168363

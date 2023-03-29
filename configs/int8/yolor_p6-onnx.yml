@@ -1,0 +1,32 @@
+models:
+  - name: yolor_p6
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolor
+          output_name: 'output'
+          threshold: 0.001
+
+    datasets:
+      - name: COCO2017_detection_80cl
+
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            size: 1280
+          - type: padding
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: resize_prediction_boxes
+            rescale: True
+          - type: nms
+            overlap: 0.65
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: coco_precision
+            max_detections: 100
+            reference: 0.5252

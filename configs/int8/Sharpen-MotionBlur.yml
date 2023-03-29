@@ -1,0 +1,27 @@
+models:
+  - name: Sharpen-MotionBlur
+    launchers:
+      - framework: dlsdk
+
+        adapter: 
+          type: image_processing
+          std: 255
+
+    
+    datasets:
+      - name: SharpenMotionBlurDataset_lpips
+        preprocessing:
+          - type: normalization
+            std: 255
+            images_only: true
+
+
+        metrics:
+          - type: lpips
+            presenter: print_vector
+            color_order: BGR
+            distance_threshold: 0.1
+            reference:
+              mean: 0.210532
+              ratio_greater_0.1: 0.854667
+              std: 0.11567

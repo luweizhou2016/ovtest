@@ -1,0 +1,44 @@
+evaluations:
+  - name: topaz_video_super_resolution
+    module: custom_evaluators.sr_evaluator.SuperResolutionFeedbackEvaluator
+    module_config:
+      network_info:
+        srmodel:
+          feedback_input: 'pre_outputs'
+          inputs:
+            - name: 'cur_inputs'
+              type: INPUT
+              value: 1
+            - name: 'pre_inputs'
+              type: INPUT
+              value: 0
+            - name: 'pre_outputs'
+              type: INPUT
+              value: 2
+              blob: 'generator/generator_unit/output_stage/output'
+              initializer: 'init.jpg'
+          adapter:
+            type: super_resolution
+            std: 127.5
+            mean: 127.5
+            reverse_channels: True
+            target_out: 'generator/generator_unit/output_stage/output'
+      launchers:
+        - framework: openvino
+      datasets:
+        - name: Topaz_tlv2Frames
+          reader: pillow_imread
+          postprocessing:
+            - type: resize_super_resolution
+              dst_width: 384
+              dst_height: 384
+              target: annotation
+          metrics:
+            - type: lpips
+              color_order: BGR
+              distance_threshold: 0.1
+              presenter: print_vector
+              reference:
+                mean: 0.351663
+                ratio_greater_0.1: 1
+                std: 0.041063

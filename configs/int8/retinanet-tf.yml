@@ -1,0 +1,22 @@
+models:
+  - name: retinanet
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+    datasets:
+      - name: COCO2017_detection_80cl
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: frcnn_keep_aspect_ratio
+            size: 1333
+          - type: padding
+            size: 1333
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            size: 1333
+
+        metrics:
+          - type: coco_precision
+            reference: 0.3315

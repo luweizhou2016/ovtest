@@ -1,0 +1,58 @@
+models:
+  - name: retinanet_resnet50
+
+    launchers:
+
+      - framework: dlsdk
+        tags:
+          - FP32
+        device: CPU
+        tf_model: ModelZoo/model-zoo-models-public/object_detection/common/retinanet/tf/retinanet_resnet50_coco_best_v2.1.0.pb
+        #model: retinanet_resnet50.xml
+        #weights: retinanet_resnet50.bin
+        adapter: ssd
+        cpu_extensions: AUTO
+        #allow_reshape_input: True
+        should_log_mo_cmd: True
+        mo_params:
+          model_name: retinanet_resnet50
+          data_type: FP32
+          input_shape: "[1,1333,1333,3]"
+          input: input_1
+          #mean_values: "[103.939,116.779,123.68]" -- TODO: check it!!!
+          output: filtered_detections/map/TensorArrayStack/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_1/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_2/TensorArrayGatherV3
+          tensorflow_use_custom_operations_config: retinanet.json
+#        mo_flags:
+#          - keep_shape_ops
+
+
+    datasets:
+      - name: COCO2017
+        #data_source: MSCOCO/val2017
+        data_source: COCO/data/images/val2017/
+        annotation: mscoco_detection.FULL.pickle
+        dataset_meta: mscoco_detection.FULL.json
+        annotation_conversion:
+                converter: mscoco_detection
+                annotation_file: COCO/data/annotations/instances_val2017.json
+
+
+        preprocessing:
+            # TODO: check if all preprocessing is done w.r.t. https://github.com/fizyr/keras-retinanet correctly
+          - type: normalization
+            mean: 103.939,116.779,123.68
+          - type: resize
+            aspect_ratio_scale: frcnn_keep_aspect_ratio
+            dst_height: 1333
+            dst_width: 1333
+          - type: padding
+            size: 1333
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            dst_height: 1333
+            dst_width: 1333
+
+        metrics:
+          - type: coco_orig_precision

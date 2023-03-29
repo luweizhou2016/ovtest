@@ -1,0 +1,22 @@
+models:
+    - name: srgan
+      launchers:
+          - framework: dlsdk
+            adapter:
+              type: super_resolution
+              reverse_channels: True
+              scale: 255
+      datasets:
+          - name: DIV2K_x4
+            preprocessing:
+            - type: resize
+              size: 64
+            postprocessing:
+            - type: resize_super_resolution
+
+            metrics:
+            - type: psnr
+              presenter: print_vector
+              reference:
+                mean: 12.64
+                std: 2.00

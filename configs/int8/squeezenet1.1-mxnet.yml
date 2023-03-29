@@ -1,0 +1,21 @@
+models:
+- name: squeezenet1.1
+  launchers:
+  - framework: dlsdk
+    adapter: classification
+  datasets:
+  - name: ImageNet2012
+    preprocessing:
+    - type: resize
+      size: 256
+    - type: crop
+      size: 227
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+      reference: 0.58384
+    - name: accuracy@top5
+      type: accuracy
+      top_k: 5
+      reference: 0.81006

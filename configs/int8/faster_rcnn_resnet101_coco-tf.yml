@@ -1,0 +1,19 @@
+models:
+- name: faster_rcnn_resnet101_coco
+  launchers:
+  - framework: dlsdk
+    adapter: ssd
+    inputs:
+    - name: image_info
+      type: CONST_INPUT
+      value:
+      - - 600
+        - 1024
+        - 1
+  datasets:
+  - name: COCO2017_detection_91cl_bkgr
+    metrics:
+    - type: coco_precision
+      reference: 0.3572
+    - type: coco_orig_precision
+      reference: 0.3482
