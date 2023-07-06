@@ -26,14 +26,16 @@ def get_cmd(cfg, model_path, args):
     if len(extra_cmd) == 0:
         extra_cmd = "echo"
     if args.tput:
-        return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t 10 -hint=tput {extra_options} -m {model_path}"
-    return f"cd {bin_folder}; {extra_cmd}; numactl -m 0 -C {config.physcpubind} /usr/bin/time -v ./benchmark_app -t {args.time} -nstreams=1 -nthreads=4 -hint=none -nireq=4 {extra_options} -m {model_path}"
+        return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=tput {extra_options} -m {model_path}"
+    elif args.latency:
+        return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=latency {extra_options} -m {model_path}"
+    return f"cd {bin_folder}; {extra_cmd}; numactl-m 0 -C {config.physcpubind} /usr/bin/time -v ./benchmark_app -t {args.time} -nstreams=1 -nthreads=8 -hint=none {extra_options} -m {model_path}"
 
 class info:
     pat = {
         "load":re.compile("\[ INFO \] Load network took (\d*.?\d*) ms"),
-        "latmin":re.compile("\[ INFO \] 	Min:\s*(\d*.?\d*) ms"),
-        "latavg":re.compile("\[ INFO \] 	Average:\s*(\d*.?\d*) ms"),
+        "latmin":re.compile("\[ INFO \]    Min:\s*(\d*.?\d*) ms"),
+        "latavg":re.compile("\[ INFO \]    Average:\s*(\d*.?\d*) ms"),
         "tput":re.compile("\[ INFO \] Throughput:\s*(\d*.?\d*) FPS"),
         "build":re.compile("\[ INFO \] Build ................................. (.*)"),
         "cpu":re.compile("\s*Percent of CPU this job got: (\d*)%"),
@@ -78,6 +80,7 @@ if __name__ == "__main__":
     parser.add_argument("-r","--repeat", type=int, help="how many times to repeat the test to get max FPS", default=3)
     
     parser.add_argument("--tput", action="store_true", help="use hint=tput instead of (1stream + 4threads)")
+    parser.add_argument("--latency", action="store_true", help="use hint=latency instead of (1stream + 4threads)")
     parser.add_argument("--model_list", type=str, default="int8_models/ww06_list.txt")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
@@ -93,6 +96,8 @@ if __name__ == "__main__":
     geomean_load = 1.0
     geomean_rss = 1.0
     geomean_cnt = 0
+    geomean_latavg = 1.0
+
     log_ref = ""
     def do_test(cfg, mpath, args):
         ret = None
@@ -136,6 +141,7 @@ if __name__ == "__main__":
         geomean_load *= cmp.load
         geomean_rss *= cmp.rss
         geomean_cnt += 1
+        geomean_latavg *= cmp.latavg
 
         # bigger is better
         def nocolored_ratio(prefix, ratio, bigger_better):
@@ -150,11 +156,13 @@ if __name__ == "__main__":
                 lower_clor = Fore.GREEN
             return (bigger_color if ratio > 1 else lower_clor) + f"{prefix}:{ratio:.3f}" + Fore.RESET
 
-        def get_text(color_func):
+        def get_text(color_func, args):
             CF = color_func
-            return f'{i:3d}/{len(models)} {" [ Improved ] " if cmp.tput > 1 else "[Regression]"} {CF("tput", cmp.tput, 1)} {CF("load",cmp.load,-1)} {CF("rss",cmp.rss, -1)} {mpath[len(comm_prefix):]}'
-
-        s = get_text(colored_ratio)
+            if args.latency:
+                return f'{i:3d}/{len(models)} {" [ Improved ] " if cmp.latavg < 1 else "[Regression]"} {CF("latavg",cmp.latavg,-1)} {CF("tput", cmp.tput, 1)} {CF("load",cmp.load,-1)} {CF("rss",cmp.rss, -1)} {mpath[len(comm_prefix):]}'
+            else:
+                return f'{i:3d}/{len(models)} {" [ Improved ] " if cmp.tput > 1 else "[Regression]"} {CF("tput", cmp.tput, 1)} {CF("latavg",cmp.latavg,-1)} {CF("load",cmp.load,-1)} {CF("rss",cmp.rss, -1)} {mpath[len(comm_prefix):]}'
+        s = get_text(colored_ratio, args)
         print(s)
         models_list.append([s, cmp])
 
@@ -164,12 +172,18 @@ if __name__ == "__main__":
     def getTput(item):
         s, cmp = item
         return cmp.tput
-
-    models_list.sort(key=getTput, reverse=True)
+    def getLatAvg(item):
+        s, cmp = item
+        return cmp.latavg
+    if args.latency:
+        models_list.sort(key=getLatAvg, reverse=False)
+    else:
+        models_list.sort(key=getTput, reverse=True)
     for s,cmp in models_list:
         print(s)
 
     print(f"geomean_tput = {geomean_tput ** (1/geomean_cnt):.3f}")
+    print(f"geomean_latavg = {geomean_latavg ** (1/geomean_cnt):.3f}")
     print(f"geomean_load = {geomean_load ** (1/geomean_cnt):.3f}")
     print(f"geomean_rss = {geomean_rss ** (1/geomean_cnt):.3f}")
 
