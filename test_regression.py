@@ -135,10 +135,14 @@ if __name__ == "__main__":
 
     log_ref = ""
     # Check whether the specified path exists or not
+    # isExist = os.path.exists(dbg_dir)
+    # if isExist:
+    #     shutil.rmtree(dbg_dir)
+    # os.makedirs(dbg_dir)
+
     isExist = os.path.exists(dbg_dir)
-    if isExist:
-        shutil.rmtree(dbg_dir)
-    os.makedirs(dbg_dir)
+    if not isExist:
+        os.makedirs(dbg_dir)
     def do_test(cfg, mpath, args):
         ret = None
         error_happens = False
