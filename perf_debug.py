@@ -7,10 +7,10 @@ import subprocess
 import colorama
 import shutil
 from colorama import Fore
-from perf_node import *
+from cmp_perf import *
 
 config_ref = {
-    "bin_folder":"./openvino/bin_brg/intel64/Release",
+    "bin_folder":"./openvino/bin_master/intel64/Release",
     "extra_options":"-infer_precision=f32",
     "extra_cmd":"",
 }
@@ -51,14 +51,14 @@ def get_cmd(cfg, model_path, args):
             return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=tput {extra_options} -m {model_path} | tee {log_file}"
         elif args.latency:
             return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=latency {extra_options} -m {model_path} | tee {log_file}"
-        return f"cd {bin_folder}; {extra_cmd}; numactl -m 1 -C 56-63 /usr/bin/time -v ./benchmark_app -t {args.time} -nstreams=1 -nthreads=8 -hint=none {extra_options} -m {model_path} | tee {log_file}"
+        return f"cd {bin_folder}; {extra_cmd}; numactl -C 0,2,4,6,8,10,12,14 /usr/bin/time -v ./benchmark_app -t {args.time} -nstreams=2 -nthreads=4 -hint=none {extra_options} -m {model_path} | tee {log_file}"
     else:
         ### argument time would be ignored. Only infer once to collect logs.
         if args.tput:
             return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -niter 1 -hint=tput {extra_options} -m {model_path} | tee {log_file}"
         elif args.latency:
             return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -niter 1 -hint=latency {extra_options} -m {model_path} | tee {log_file}"
-        return f"cd {bin_folder}; {extra_cmd}; numactl -m 1 -C 56-63 /usr/bin/time -v ./benchmark_app -niter 1 -nstreams=1 -nthreads=8 -hint=none {extra_options} -m {model_path} | tee {log_file}"
+        return f"cd {bin_folder}; {extra_cmd}; numactl  -C  0,2,4,6,8,10,12,14  /usr/bin/time -v ./benchmark_app -niter 1 -nstreams=1 -nthreads=8 -hint=none {extra_options} -m {model_path} | tee {log_file}"
 
 class info:
     pat = {

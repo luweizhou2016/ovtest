@@ -198,7 +198,7 @@ def compare_perf(ref_path, target_path):
     return topN_regression_dic
 
 ### Uncomment the Direct debug with file inputs.
-ref_path = sys.argv[1]
-target_path = sys.argv[2]
-compare_perf(ref_path, target_path)
+# ref_path = sys.argv[1]
+# target_path = sys.argv[2]
+# compare_perf(ref_path, target_path)
 
