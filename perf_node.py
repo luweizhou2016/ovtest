@@ -1,81 +1,101 @@
 import sys
 
-def parse_data_list_from_file(in_file, token_list):
+idx_ir_perf = 0
+idx_type_perf = 1
+idx_node_perf = 2
+
+idx_total_in_ir = 0
+idx_avg_in_ir = 1
+
+### return type is a list of list.
+### return the[stream0_perf, stream1_perf, .....].
+### each streamX_perf would be [graph perf, perf_by_types, perf_by_nodes],
+def parse_raw_perf_data(in_file, token_list):
     if len(token_list) < 2:
         return[]
-    stream_list = []
-    buffer_list = []
-    buffer = []
-    pos_end = 1
+    multi_streams_perf = []
+    stream_perf = []
+    token_perf = []
     start_token = token_list[0]
     end_token = token_list[1]
+    end_token_idx = 1
 
-    stream_token_found = False
-    perf_token = False
+    line_in_stream = False
+    line_in_token = False
     for line in in_file:
-        if line.startswith('======= ENABLE_DEBUG_CAPS:OV_CPU_SUMMARY_PERF ======') and stream_token_found == False:
-            stream_token_found = True
-            perf_token = False
-        elif stream_token_found == False:
+        if line.startswith('======= ENABLE_DEBUG_CAPS:OV_CPU_SUMMARY_PERF ======') and line_in_stream == False:
+            line_in_stream = True
+            line_in_token = False
+        elif line_in_stream == False:
             continue
-        ###in stream buffer
-        if line.startswith(start_token) and perf_token == False:
-            buffer = []
-            buffer_list = []
-            perf_token = True
-            pos_end = 1
-        elif perf_token == True and line.startswith(end_token):
-            buffer_list.append(buffer)
+        ### else cases would all in stream perf buffer.
+        if line.startswith(start_token) and line_in_token == False:
+            token_perf = []
+            stream_perf = []
+            line_in_token = True
+            end_token_idx = 1
+        elif line_in_token == True and line.startswith(end_token):
+            ## append perf data between tokens into stream perf
+            stream_perf.append(token_perf)
             if end_token == token_list[-1]:
-                stream_token_found = False
-                stream_list.append(buffer_list)
+                ### one stream is ready
+                line_in_stream = False
+                ### append stream data into list. 
+                multi_streams_perf.append(stream_perf)
                 start_token = token_list[0]
                 end_token = token_list[1]
-                buffer_list = []
-                buffer = []
+                stream_perf = []
+                token_perf = []
 
             else:
-                pos_end += 1
-                end_token = token_list[pos_end]
-                buffer = []
-            # print(buffer)
-            # print(len(buffer))
-        elif perf_token == True:
+                end_token_idx += 1
+                end_token = token_list[end_token_idx]
+                token_perf = []
+            # print(token_perf)
+            # print(len(token_perf))
+        elif line_in_token == True:
             # print(line)
-            buffer.append(line.strip())
-    return stream_list
+            ### append per-node data
+            token_perf.append(line.strip())
+    return multi_streams_perf
 
-def get_per_node_perf(node_data):
+### return nodes perf dic.
+### key: node_name        
+### value: list [perf_counter, precentage, implement_type]
+def nodes_perf_in_dic(nodes_data):
     dic = {}
-    for line in node_data:
+    for line in nodes_data:
         perc, x, perf, y, node_name, imp_type = line.split()
         counter,*x = perf.split('(')
         dic[node_name] = [float(counter), perc, imp_type]
     return dic
 
-def perf_from_file(perf_file_path):
+### return a list of [stream0_data, stream2_data,....]
+### streamXdata: tuple of (nodes perf dic , average_time).
+### nodes perf: return of nodes_perf_in_dic()
+def get_perf(perf_file_path):
     token_list = ['Summary of ', ' perf_by_type:', ' perf_by_node:', 'perf_summary_end']
     with open(perf_file_path) as infile:
-        stream_buffer = parse_data_list_from_file(infile, token_list)
-    stream_list = []
-    for buffer in stream_buffer:
-        dic = get_per_node_perf(buffer[2])
-        *a, avg = buffer[0][1].split()
-        stream_list.append((dic, float(avg)))
-    return stream_list
+        raw_perf_streams = parse_raw_perf_data(infile, token_list)
+    streams_perf = []
+    for raw_perf_per_stream in raw_perf_streams:
+        dic = nodes_perf_in_dic(raw_perf_per_stream[idx_node_perf])
+        *a, avg_perf = raw_perf_per_stream[idx_ir_perf][idx_avg_in_ir].split()
+        streams_perf.append((dic, float(avg_perf)))
+    return streams_perf
 
-def compare_perf_file(ref_path, target_path):
-    target_stream_list = perf_from_file(target_path)
-    ref_stream_list = perf_from_file(ref_path)
+def compare_perf(ref_path, target_path):
+    targ_streams_perf = get_perf(target_path)
+    ref_streams_perf = get_perf(ref_path)
 
-    if len(target_stream_list) != len(ref_stream_list):
-        print('Error')
+    if len(targ_streams_perf) != len(ref_streams_perf):
+        print('Error: target streams number is {0} , not equal with refrence streams number {1}'. format(len(targ_streams_perf), len(ref_streams_perf)))
         exit()
     topN_regression_dic = {}
-    print(len(target_stream_list))
-    for stream_idx in range(0, len(target_stream_list)):
-        target_perf, target_avg = target_stream_list[stream_idx]
-        ref_perf, ref_avg = ref_stream_list[stream_idx]
+    print(len(targ_streams_perf))
+    for stream_idx in range(0, len(targ_streams_perf)):
+        target_perf, target_avg = targ_streams_perf[stream_idx]
+        ref_perf, ref_avg = ref_streams_perf[stream_idx]
         nodes_dic = {}
         new_nodes_dic = {}
         missing_nodes_dic = {}
@@ -149,5 +169,5 @@ def compare_perf_file(ref_path, target_path):
 ### Uncomment the Direct debug with file inputs.
 ref_path = sys.argv[1]
 target_path = sys.argv[2]
-compare_perf_file(ref_path, target_path)
+compare_perf(ref_path, target_path)
 

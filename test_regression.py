@@ -230,4 +230,4 @@ if __name__ == "__main__":
             name,*x = ir.split('.')
             log_ref = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_"}{"perf_"}{name}{".txt"}'
             log_targ = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"targ_"}{"perf_"}{name}{".txt"}'
-            compare_perf_file(log_ref, log_targ)
+            compare_perf(log_ref, log_targ)
