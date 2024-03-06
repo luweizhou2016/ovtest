@@ -5,7 +5,9 @@ import argparse
 import re, math,config
 import subprocess
 import colorama
+import shutil
 from colorama import Fore
+from perf_node import *
 
 config_ref = {
     "bin_folder":"./openvino/bin_brg/intel64/Release",
@@ -19,17 +21,44 @@ config_tag = {
     "extra_cmd":"",
 }
 
+dbg_dir = "debug_log"
+
 def get_cmd(cfg, model_path, args):
     bin_folder = cfg['bin_folder']
     extra_cmd = cfg['extra_cmd']
     extra_options = cfg['extra_options']
+    *x, ir = model_path.split('/')
+    name,*x = ir.split('.')
+    log_file = ''
+    is_ref = True
+    is_perf = True
+    if bin_folder == config_ref['bin_folder']:
+        is_ref = True
+    else:
+        is_ref = False
+    if "perf" in args.debug:
+        is_perf = True
+    else:
+        is_perf = False
+    ## generate logging file name.
+    log_file = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_" if is_ref else "targ_"}{"perf_" if is_perf else "verbose_"}{name}{".txt"}'
     if len(extra_cmd) == 0:
         extra_cmd = "echo"
-    if args.tput:
-        return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=tput {extra_options} -m {model_path}"
-    elif args.latency:
-        return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=latency {extra_options} -m {model_path}"
-    return f"cd {bin_folder}; {extra_cmd}; numactl -m 1 -C 56-63 /usr/bin/time -v ./benchmark_app -niter 1 -nstreams=1 -nthreads=8 -hint=none {extra_options} -m {model_path}"
+    if is_perf:
+        #### collect the perf information. need to run with some timing
+        if args.tput:
+            ## tee command to both saved into files and output to bash.
+            return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=tput {extra_options} -m {model_path} | tee {log_file}"
+        elif args.latency:
+            return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -t {args.time} -hint=latency {extra_options} -m {model_path} | tee {log_file}"
+        return f"cd {bin_folder}; {extra_cmd}; numactl -m 1 -C 56-63 /usr/bin/time -v ./benchmark_app -t {args.time} -nstreams=1 -nthreads=8 -hint=none {extra_options} -m {model_path} | tee {log_file}"
+    else:
+        ### argument time would be ignored. Only infer once to collect logs.
+        if args.tput:
+            return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -niter 1 -hint=tput {extra_options} -m {model_path} | tee {log_file}"
+        elif args.latency:
+            return f"cd {bin_folder}; {extra_cmd}; /usr/bin/time -v ./benchmark_app -niter 1 -hint=latency {extra_options} -m {model_path} | tee {log_file}"
+        return f"cd {bin_folder}; {extra_cmd}; numactl -m 1 -C 56-63 /usr/bin/time -v ./benchmark_app -niter 1 -nstreams=1 -nthreads=8 -hint=none {extra_options} -m {model_path} | tee {log_file}"
 
 class info:
     pat = {
@@ -76,18 +105,22 @@ class compare_info:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=f"Test performance")
     parser.add_argument("-f", "--name_filter", type=str, help="target model name filter", default="")
-    parser.add_argument("-t","--time", type=int, help="seconds to test", default=1)
-    parser.add_argument("-r","--repeat", type=int, help="how many times to repeat the test to get max FPS", default=3)
-    
+    parser.add_argument("-t","--time", type=int, help="seconds to test. -t would not work when --log=debug or --log=verbose", default=1)    
     parser.add_argument("--tput", action="store_true", help="use hint=tput instead of (1stream + 4threads)")
     parser.add_argument("--latency", action="store_true", help="use hint=latency instead of (1stream + 4threads)")
     parser.add_argument("--model_list", type=str, default="int8_models/ww06_list.txt")
     parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument('--debug', nargs='+', type=str, help="onednn: for onednn verbose, cpudbg: for cpu debuglog, perf: for perf_summary.", default="perf")
     args = parser.parse_args()
     # os.environ["ONEDNN_MAX_CPU_ISA"]="AVX512_CORE"
-    # os.environ["ONEDNN_VERBOSE"]="1"
-    ##os.environ["OV_CPU_DEBUG_LOG"]="-"
-    os.environ["OV_CPU_SUMMARY_PERF"]="1"
+    if ("onednn" in args.debug or "cpudbg" in args.debug) and args.tput:
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Will collect tput mode debug verbose.")
+    if "onednn" in args.debug:
+        os.environ["ONEDNN_VERBOSE"]="1"
+    if "cpudbg" in args.debug:
+        os.environ["OV_CPU_DEBUG_LOG"]="-"
+    if "perf" in args.debug:
+        os.environ["OV_CPU_SUMMARY_PERF"]="1"
 
     print(f"searching for xml models in {args.model_list}...")
     models = utils.get_models_xmlyml_from_list(args.model_list, args.name_filter)
@@ -101,29 +134,31 @@ if __name__ == "__main__":
     geomean_latavg = 1.0
 
     log_ref = ""
+    # Check whether the specified path exists or not
+    isExist = os.path.exists(dbg_dir)
+    if isExist:
+        shutil.rmtree(dbg_dir)
+    os.makedirs(dbg_dir)
     def do_test(cfg, mpath, args):
         ret = None
         error_happens = False
-        for i in range(args.repeat):
-            log_ref = ""
-            try:
-                cmdline = get_cmd(cfg, mpath, args)
-                if args.verbose:
-                    print(cmdline)
-                log_ref = subprocess.check_output(cmdline, shell=True, stderr=subprocess.STDOUT, encoding="utf-8")
-            except:
-                print(Fore.RED + f"{mpath} failed in {cfg}, skip" + Fore.RESET)
-                print(log_ref)
-                error_happens = True
-                break
+        log_ref = ""
+        try:
+            cmdline = get_cmd(cfg, mpath, args)
             if args.verbose:
-                print(log_ref)
-            i0 = info(log_ref)
-            print(f"\t{i0}")
-            if not ret:
-                ret = i0
-            elif (i0.tput > ret.tput):
-                ret = i0
+                print(cmdline)
+            log_ref = subprocess.check_output(cmdline, shell=True, stderr=subprocess.STDOUT, encoding="utf-8")
+        except:
+            print(Fore.RED + f"{mpath} failed in {cfg}, skip" + Fore.RESET)
+            print(log_ref)
+            error_happens = True
+            return None
+        if args.verbose:
+            print(log_ref)
+        i0 = info(log_ref)
+        print(f"\t{i0}")
+        if not ret:
+            ret = i0
         return ret
 
     for i, (xml, _) in enumerate(models):
@@ -161,9 +196,9 @@ if __name__ == "__main__":
         def get_text(color_func, args):
             CF = color_func
             if args.latency:
-                return f'{i:3d}/{len(models)} {" [ Improved ] " if cmp.latavg < 1 else "[Regression]"} {CF("latavg",cmp.latavg,-1)} {CF("tput", cmp.tput, 1)} {CF("load",cmp.load,-1)} {CF("rss",cmp.rss, -1)} {mpath[len(comm_prefix):]}'
+                return f'{i:3d}/{len(models)} {" [ Improved ] " if cmp.latavg < 1 else "[Regression]"} {CF("latavg",cmp.latavg,-1)} {CF("tput", cmp.tput, 1)} {CF("load",cmp.load,-1)} {CF("rss",cmp.rss, -1)} {mpath[-len(comm_prefix):]}'
             else:
-                return f'{i:3d}/{len(models)} {" [ Improved ] " if cmp.tput > 1 else "[Regression]"} {CF("tput", cmp.tput, 1)} {CF("latavg",cmp.latavg,-1)} {CF("load",cmp.load,-1)} {CF("rss",cmp.rss, -1)} {mpath[len(comm_prefix):]}'
+                return f'{i:3d}/{len(models)} {" [ Improved ] " if cmp.tput > 1 else "[Regression]"} {CF("tput", cmp.tput, 1)} {CF("latavg",cmp.latavg,-1)} {CF("load",cmp.load,-1)} {CF("rss",cmp.rss, -1)} {mpath[-len(comm_prefix):]}'
         s = get_text(colored_ratio, args)
         print(s)
         models_list.append([s, cmp])
@@ -189,3 +224,10 @@ if __name__ == "__main__":
     print(f"geomean_load = {geomean_load ** (1/geomean_cnt):.3f}")
     print(f"geomean_rss = {geomean_rss ** (1/geomean_cnt):.3f}")
 
+    if "perf" in args.debug:
+        for i, (xml, _) in enumerate(models):
+            *x, ir = xml.split('/')
+            name,*x = ir.split('.')
+            log_ref = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_"}{"perf_"}{name}{".txt"}'
+            log_targ = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"targ_"}{"perf_"}{name}{".txt"}'
+            compare_perf_file(log_ref, log_targ)
