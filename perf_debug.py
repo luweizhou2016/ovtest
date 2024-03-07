@@ -16,7 +16,7 @@ config_ref = {
 }
 
 config_tag = {
-    "bin_folder":"./openvino/bin_brg_fix/intel64/Release",
+    "bin_folder":"./openvino/bin_brg/intel64/Release",
     "extra_options":"-infer_precision=f32",
     "extra_cmd":"",
 }
@@ -121,6 +121,9 @@ if __name__ == "__main__":
         os.environ["OV_CPU_DEBUG_LOG"]="-"
     if "perf" in args.debug:
         os.environ["OV_CPU_SUMMARY_PERF"]="1"
+        os.environ["OV_CPU_DEBUG_LOG"]=""
+        os.environ["ONEDNN_VERBOSE"]="none"
+
 
     print(f"searching for xml models in {args.model_list}...")
     models = utils.get_models_xmlyml_from_list(args.model_list, args.name_filter)
@@ -228,10 +231,30 @@ if __name__ == "__main__":
     print(f"geomean_load = {geomean_load ** (1/geomean_cnt):.3f}")
     print(f"geomean_rss = {geomean_rss ** (1/geomean_cnt):.3f}")
 
+    fp_nodes = open('./nodes.txt',  'w')
     if "perf" in args.debug:
         for i, (xml, _) in enumerate(models):
             *x, ir = xml.split('/')
             name,*x = ir.split('.')
             log_ref = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_"}{"perf_"}{name}{".txt"}'
             log_targ = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"targ_"}{"perf_"}{name}{".txt"}'
-            compare_perf(log_ref, log_targ)
+            dic = compare_perf(log_ref, log_targ)
+            fp_nodes.write("%s:\n" % xml)
+            for idx,nodes in dic.items():
+                fp_nodes.write("STREAM%d:\n\n" % idx)
+                for node in nodes:
+                    fp_nodes.write("%s\n" % node)
+    fp_nodes.close()
+
+    args_verbose = args
+    args.debug = 'cpudbg'
+    os.environ["OV_CPU_DEBUG_LOG"]="-"
+    os.environ["OV_CPU_SUMMARY_PERF"]=""
+    for i, (xml, _) in enumerate(models):
+        mpath = f"{os.getcwd()}/{xml}"
+        i0 = do_test(config_ref, mpath, args_verbose)
+        if not i0:
+            continue
+        i1 = do_test(config_tag, mpath, args_verbose)
+        if not i1:
+            continue
