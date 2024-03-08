@@ -21,7 +21,7 @@ config_tag = {
     "extra_cmd":"",
 }
 
-dbg_dir = "debug_log"
+# dbg_dir = "debug_log"
 
 def get_cmd(cfg, model_path, args):
     bin_folder = cfg['bin_folder']
@@ -32,6 +32,7 @@ def get_cmd(cfg, model_path, args):
     log_file = ''
     is_ref = True
     is_perf = True
+    dbg_dir = args.output_dir
     if bin_folder == config_ref['bin_folder']:
         is_ref = True
     else:
@@ -110,7 +111,9 @@ if __name__ == "__main__":
     parser.add_argument("--latency", action="store_true", help="use hint=latency instead of (1stream + 4threads)")
     parser.add_argument("--model_list", type=str, default="int8_models/ww06_list.txt")
     parser.add_argument("-v", "--verbose", action="store_true")
-    parser.add_argument('--debug', nargs='+', type=str, help="onednn: for onednn verbose, cpudbg: for cpu debuglog, perf: for perf_summary.", default="perf")
+    parser.add_argument('--debug', nargs='+', type=str, help="onednn: only record onednn verbose, cpudbg: only record debuglog, perf: record perf and record regression nodes", default="perf")
+    parser.add_argument('-o',"--output_dir", type=str, help="Folder of recorded files", default="debug_log")
+
     args = parser.parse_args()
     # os.environ["ONEDNN_MAX_CPU_ISA"]="AVX512_CORE"
     if ("onednn" in args.debug or "cpudbg" in args.debug) and args.tput:
@@ -137,6 +140,7 @@ if __name__ == "__main__":
     geomean_latavg = 1.0
 
     log_ref = ""
+    dbg_dir = args.output_dir
     # Check whether the specified path exists or not
     # isExist = os.path.exists(dbg_dir)
     # if isExist:
@@ -146,7 +150,7 @@ if __name__ == "__main__":
     isExist = os.path.exists(dbg_dir)
     if not isExist:
         os.makedirs(dbg_dir)
-    def do_test(cfg, mpath, args):
+    def do_test(cfg, mpath, args, print_info = True):
         ret = None
         error_happens = False
         log_ref = ""
@@ -163,7 +167,8 @@ if __name__ == "__main__":
         if args.verbose:
             print(log_ref)
         i0 = info(log_ref)
-        print(f"\t{i0}")
+        if print_info:
+            print(f"\t{i0}")
         if not ret:
             ret = i0
         return ret
@@ -231,30 +236,42 @@ if __name__ == "__main__":
     print(f"geomean_load = {geomean_load ** (1/geomean_cnt):.3f}")
     print(f"geomean_rss = {geomean_rss ** (1/geomean_cnt):.3f}")
 
-    fp_nodes = open('./nodes.txt',  'w')
+
     if "perf" in args.debug:
+        regressed_nodes_file = f'{args.output_dir}{"/nodes.txt"}'
+        fp_nodes = open(regressed_nodes_file,  'w')
+
         for i, (xml, _) in enumerate(models):
             *x, ir = xml.split('/')
             name,*x = ir.split('.')
             log_ref = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_"}{"perf_"}{name}{".txt"}'
             log_targ = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"targ_"}{"perf_"}{name}{".txt"}'
+            print(xml)
             dic = compare_perf(log_ref, log_targ)
             fp_nodes.write("%s:\n" % xml)
             for idx,nodes in dic.items():
                 fp_nodes.write("STREAM%d:\n\n" % idx)
                 for node in nodes:
                     fp_nodes.write("%s\n" % node)
-    fp_nodes.close()
+        fp_nodes.close()
+        print('Regressed nodes is recorded in the file of {0}'.format(regressed_nodes_file))
+        ### Collect the log with OV_CPU_DEBUG_LOG to collect
+        args_verbose = args
+        args_verbose.debug = 'cpudbg'
+        os.environ["OV_CPU_DEBUG_LOG"]="-"
+        os.environ["OV_CPU_SUMMARY_PERF"]=""
+        print('Collecting with OV_CPU_DEBUG_LOG verbose in folder: {0}.........'.format(args.output_dir))
+        if args_verbose.tput:
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Will collect cpu debug log in tput mode")
+        for i, (xml, _) in enumerate(models):
+            mpath = f"{os.getcwd()}/{xml}"
+            i0 = do_test(config_ref, mpath, args_verbose, False)
+            if not i0:
+                continue
+            i1 = do_test(config_tag, mpath, args_verbose, False)
+            if not i1:
+                continue
+        print('Collection done')
 
-    args_verbose = args
-    args.debug = 'cpudbg'
-    os.environ["OV_CPU_DEBUG_LOG"]="-"
-    os.environ["OV_CPU_SUMMARY_PERF"]=""
-    for i, (xml, _) in enumerate(models):
-        mpath = f"{os.getcwd()}/{xml}"
-        i0 = do_test(config_ref, mpath, args_verbose)
-        if not i0:
-            continue
-        i1 = do_test(config_tag, mpath, args_verbose)
-        if not i1:
-            continue
+        ### Collect the log with OV_CPU_DEBUG_LOG to collect
+

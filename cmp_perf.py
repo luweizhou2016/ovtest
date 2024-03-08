@@ -142,16 +142,18 @@ def compare_perf(ref_path, target_path):
         total_regression_perc = (target_avg - ref_avg) * 100.0 / ref_avg
         nodes_regression_perc = sum(sorted_regressed_nodes.values()) * 100 / ref_avg
         nodes_gain_perc = sum(sorted_gain_nodes.values()) * 100 / ref_avg
-
         new_regression_perc = sum(new_dic.values()) * 100 / ref_avg
+        missing_prec = sum(missing_dic.values()) * 100 / ref_avg
+
         # print(sorted_nodes)
         topN = 10
         topN_nodes = []
         node_num = 0
-        print('\n')
         print(stream_token)
-        print(' STREAM ID: {0} , Total regression: [{6:.0f}us -> {7:.0f}us,  {1:.3f}% ], Breakdown in 3 cases: ({2:.3f}%) + ({3:.3f}%) + ({4:.3f}%) = {5:.3f}% (regress + gain + new)  '.format(stream_idx, total_regression_perc, nodes_regression_perc,
-                                                                        nodes_gain_perc, new_regression_perc, nodes_regression_perc+nodes_gain_perc+new_regression_perc, ref_avg, target_avg))
+        print(' STREAM ID: {0} , Total regression: [{6:.0f}us -> {7:.0f}us,  {1:.3f}% ], Break down into 4 cases: ({2:.3f}%) + ({3:.3f}%) + ({4:.3f}%) + (-{8:.3f}%) = {5:.3f}% (regress - gain + new - missing)  '.format(stream_idx,
+                                                                        total_regression_perc, nodes_regression_perc,
+                                                                        nodes_gain_perc, new_regression_perc, nodes_regression_perc+nodes_gain_perc+new_regression_perc-missing_prec,
+                                                                        ref_avg, target_avg, missing_prec))
         print(stream_token)
 
         print('@@@@ TOP {0} REGRESSED NODE LIST:'.format(topN))
@@ -163,8 +165,7 @@ def compare_perf(ref_path, target_path):
                 r_type = (ref_perf[name])[idx_impl_type_in_list]
                 perc_in_avg = cnt * 100.0 / ref_avg
                 perc_with_ref = cnt * 100.0 / r_cnt
-
-                print('Node regressed by: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:>20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
+                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:>20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
                 node_num += 1
                 topN_nodes.append(name)
         topN_regression_dic[stream_idx] = topN_nodes
@@ -180,7 +181,7 @@ def compare_perf(ref_path, target_path):
                 perc_in_avg = cnt * 100.0 / ref_avg
                 perc_with_ref = cnt * 100.0 / r_cnt
 
-                print('Node regressed by: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:>20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
+                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:>20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
                 node_num += 1
         print(list_token)
         print('@@@@ TOP {0} NEW NODES LIST WITH THRESHOLD_PC > 5 :'.format(topN))
@@ -191,7 +192,7 @@ def compare_perf(ref_path, target_path):
                 t_type = (target_perf[name])[idx_impl_type_in_list]
                 perc_in_avg = cnt * 100.0 / ref_avg
 
-                print('Node regressed by: {0:<6.2f} % , {1:>12.0f}us @{2:<35} , {3:>20} '.format(perc_in_avg, t_cnt, t_type, name))
+                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{2:<35} , {3:>20} '.format(perc_in_avg, t_cnt, t_type, name))
                 node_num += 1
         print(list_token)
 
