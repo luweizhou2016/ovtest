@@ -23,6 +23,7 @@ def pack_raw_perf_data(in_file, token_list):
     stream_start = False
     token_start = False
     for line in in_file:
+        ## find the stream start token
         if line.startswith('======= ENABLE_DEBUG_CAPS:OV_CPU_SUMMARY_PERF ======'):
             if token_start:
                 stream_perf.append(token_perf)
@@ -37,6 +38,7 @@ def pack_raw_perf_data(in_file, token_list):
         ##streams start = true case.
         if line.startswith(token_list[token_idx]):
             if token_start:
+                ##Append last token recorded
                 stream_perf.append(token_perf)
             token_perf = []
             token_start = True
@@ -45,6 +47,7 @@ def pack_raw_perf_data(in_file, token_list):
         elif token_start:
             if line != '\n':
                 token_perf.append(line.strip())
+    ##Append the all the remaining data if having.
     if token_start:
         stream_perf.append(token_perf)
     if stream_start:
@@ -83,7 +86,7 @@ def get_perf(perf_file_path):
 idx_perf_in_list = 0
 idx_perc_in_list = 1
 idx_impl_type_in_list = 2
-stream_token = '####################################################################################################################################################################'
+stream_mark = '####################################################################################################################################################################'
 list_token = '-----------------------------------------------------------------------------------------------------------------------------------------------------------------'
 ### compare 2 perf file with  'OV_CPU_SUMMARY_PERF = 1'
 ### return a dic of regresssed node [stream_idx:topN_regressed_list]
@@ -138,14 +141,14 @@ def compare_perf(ref_path, target_path):
         topN = 10
         topN_nodes = []
         node_num = 0
-        print(stream_token)
-        print(' STREAM ID: {0} , Total regression: [{6:.0f}us -> {7:.0f}us,  {1:.3f}% ], Break down into 4 cases: ({2:.3f}%) + ({3:.3f}%) + ({4:.3f}%) + (-{8:.3f}%) = {5:.3f}% (regress - gain + new - missing)  '.format(stream_idx,
+        print(stream_mark)
+        print('@@@STREAM ID: {0} , Total regression: [{6:.0f}us -> {7:.0f}us,  {1:.3f}% ], Break down into 4 cases: ({2:.3f}%) + ({3:.3f}%) + ({4:.3f}%) + (-{8:.3f}%) = {5:.3f}% (regress - gain + new - missing)  '.format(stream_idx,
                                                                         total_regression_perc, nodes_regression_perc,
                                                                         nodes_gain_perc, new_regression_perc, nodes_regression_perc+nodes_gain_perc+new_regression_perc-missing_prec,
                                                                         ref_avg, target_avg, missing_prec))
-        print(stream_token)
+        print(stream_mark)
 
-        print('@@@@ TOP {0} REGRESSED NODE LIST:'.format(topN))
+        print('TOP {0} REGRESSED NODE LIST:'.format(topN))
         for name, cnt in sorted_regressed_nodes.items():
             if node_num < topN:
                 t_cnt = (target_perf[name])[idx_perf_in_list]
@@ -159,7 +162,7 @@ def compare_perf(ref_path, target_path):
                 topN_nodes.append(name)
         topN_regression_dic[stream_idx] = topN_nodes
         print(list_token)
-        print('@@@@ TOP {0} PERF GAIN NODE LIST:'.format(topN))
+        print('TOP {0} PERF GAIN NODE LIST:'.format(topN))
         node_num = 0
         for name, cnt in sorted_gain_nodes.items():
             if node_num < topN:
@@ -173,7 +176,7 @@ def compare_perf(ref_path, target_path):
                 print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:>20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
                 node_num += 1
         print(list_token)
-        print('@@@@ TOP {0} NEW NODES LIST WITH THRESHOLD_PC > 5 :'.format(topN))
+        print('TOP {0} NEW NODES LIST WITH THRESHOLD_PC > 5 :'.format(topN))
         node_num = 0
         for name, cnt in sorted_new.items():
             if node_num < topN and cnt > 5 :
@@ -185,6 +188,7 @@ def compare_perf(ref_path, target_path):
                 node_num += 1
         print(list_token)
 
+    print('\n')
     return topN_regression_dic
 
 ## Uncomment the Direct debug with file inputs.

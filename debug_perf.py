@@ -248,7 +248,7 @@ if __name__ == "__main__":
             name,*x = ir.split('.')
             log_ref = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_"}{"perf_"}{name}{".txt"}'
             log_targ = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"targ_"}{"perf_"}{name}{".txt"}'
-            print(xml)
+            print('&&& {0}'.format(xml))
             dic = compare_perf(log_ref, log_targ)
             fp_nodes.write("%s:\n" % xml)
             for idx,nodes in dic.items():

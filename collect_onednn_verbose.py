@@ -66,8 +66,8 @@ def record_onednn_verbose(nodes_list, dbg_dir ='debug_log'):
         sorted_nodes_verbose = collections.OrderedDict(sorted(nodes_verbose.items()))
         for idx, value in sorted_nodes_verbose.items():
             verbose_fp.write("@%s\n" % value[0])
-            verbose_fp.write("%s\n" % value[1])
-            verbose_fp.write("%s\n" % value[2])
+            verbose_fp.write("onednn_verbose,primitive,create:cache_miss,%s\n" % value[1])
+            verbose_fp.write("onednn_verbose,primitive,create:cache_miss,%s\n" % value[2])
         verbose_fp.write("\n")
 
     verbose_fp.close()
