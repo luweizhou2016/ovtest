@@ -19,47 +19,36 @@ def pack_raw_perf_data(in_file, token_list):
     multi_streams_perf = []
     stream_perf = []
     token_perf = []
-    start_token = token_list[0]
-    end_token = token_list[1]
-    end_token_idx = 1
-
-    line_in_stream = False
-    line_in_token = False
+    token_idx = 0
+    stream_start = False
+    token_start = False
     for line in in_file:
-        if line.startswith('======= ENABLE_DEBUG_CAPS:OV_CPU_SUMMARY_PERF ======') and line_in_stream == False:
-            line_in_stream = True
-            line_in_token = False
-        elif line_in_stream == False:
-            continue
-        ### else cases would all in stream perf buffer.
-        if line.startswith(start_token) and line_in_token == False:
-            token_perf = []
-            stream_perf = []
-            line_in_token = True
-            end_token_idx = 1
-        elif line_in_token == True and line.startswith(end_token):
-            ## append perf data between tokens into stream perf
-            stream_perf.append(token_perf)
-            if end_token == token_list[-1]:
-                ### one stream is ready
-                line_in_stream = False
-                ### append stream data into list. 
+        if line.startswith('======= ENABLE_DEBUG_CAPS:OV_CPU_SUMMARY_PERF ======'):
+            if token_start:
+                stream_perf.append(token_perf)
+            if stream_start:
                 multi_streams_perf.append(stream_perf)
-                start_token = token_list[0]
-                end_token = token_list[1]
-                stream_perf = []
-                token_perf = []
-
-            else:
-                end_token_idx += 1
-                end_token = token_list[end_token_idx]
-                token_perf = []
-            # print(token_perf)
-            # print(len(token_perf))
-        elif line_in_token == True:
-            # print(line)
-            ### append per-node data
-            token_perf.append(line.strip())
+            token_idx = 0
+            stream_perf = []
+            stream_start = True
+            token_start = False
+        elif stream_start == False:
+            continue
+        ##streams start = true case.
+        if line.startswith(token_list[token_idx]):
+            if token_start:
+                stream_perf.append(token_perf)
+            token_perf = []
+            token_start = True
+            if (token_idx != len(token_list) - 1):
+                token_idx += 1
+        elif token_start:
+            if line != '\n':
+                token_perf.append(line.strip())
+    if token_start:
+        stream_perf.append(token_perf)
+    if stream_start:
+        multi_streams_perf.append(stream_perf)
     return multi_streams_perf
 
 ### convert the perf by nodes data into dictionary.
@@ -79,7 +68,7 @@ def nodes_perf_in_dic(nodes_data):
 ### streamXdata: tuple of (nodes perf dic , average_time).
 ### nodes perf: return of nodes_perf_in_dic()
 def get_perf(perf_file_path):
-    token_list = ['Summary of ', ' perf_by_type:', ' perf_by_node:', 'perf_summary_end']
+    token_list = ['Summary of ', ' perf_by_type:', ' perf_by_node:']
     with open(perf_file_path) as infile:
         raw_perf_streams = pack_raw_perf_data(infile, token_list)
     streams_perf = []
@@ -202,7 +191,7 @@ def compare_perf(ref_path, target_path):
 # ref_path = sys.argv[1]
 # target_path = sys.argv[2]
 # node_list = compare_perf(ref_path, target_path)
-# print(node_list[0])
+# print(node_list)
 # fp_nodes = open('./nodes.txt',  'w')
 
 
