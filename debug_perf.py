@@ -8,6 +8,7 @@ import colorama
 import shutil
 from colorama import Fore
 from cmp_perf import *
+from collect_onednn_verbose import *
 
 config_ref = {
     "bin_folder":"./openvino/bin_master/intel64/Release",
@@ -238,6 +239,7 @@ if __name__ == "__main__":
 
 
     if "perf" in args.debug:
+        ### Record all the regressed node into node.txt
         regressed_nodes_file = f'{args.output_dir}{"/nodes.txt"}'
         fp_nodes = open(regressed_nodes_file,  'w')
 
@@ -250,12 +252,14 @@ if __name__ == "__main__":
             dic = compare_perf(log_ref, log_targ)
             fp_nodes.write("%s:\n" % xml)
             for idx,nodes in dic.items():
-                fp_nodes.write("STREAM%d:\n\n" % idx)
+                fp_nodes.write("STREAM%d:\n" % idx)
                 for node in nodes:
                     fp_nodes.write("%s\n" % node)
+            fp_nodes.write("\n")
+
         fp_nodes.close()
         print('Regressed nodes is recorded in the file of {0}'.format(regressed_nodes_file))
-        ### Collect the log with OV_CPU_DEBUG_LOG to collect
+        ### Re-run benchmark_app to collect the log with OV_CPU_DEBUG_LOG=- under {args.output_dir} folder.
         args_verbose = args
         args_verbose.debug = 'cpudbg'
         os.environ["OV_CPU_DEBUG_LOG"]="-"
@@ -272,6 +276,7 @@ if __name__ == "__main__":
             if not i1:
                 continue
         print('Collection done')
+        node_list_regressed = parse_nodes_into_list(regressed_nodes_file)
+        record_onednn_verbose(node_list_regressed,  args.output_dir)
 
-        ### Collect the log with OV_CPU_DEBUG_LOG to collect
 

@@ -56,7 +56,7 @@ def record_onednn_verbose(nodes_list, dbg_dir ='debug_log'):
                             ###@todo: analyze the feasibility and necessity to collect onednn verbose with spcified stream idx.
                             value[verbose_idx] = line[pos+len(token):-1]
     # print(len(node_list))
-    verbose_file = f'{record_dir}/all_onednn_verbose.txt'
+    verbose_file = f'{dbg_dir}/all_onednn_verbose.txt'
     print('Start recording onednn regressed verbose into {0}'.format(verbose_file))
     verbose_fp = open(verbose_file, 'w')
     for model, nodes_verbose in nodes_list:
@@ -71,8 +71,9 @@ def record_onednn_verbose(nodes_list, dbg_dir ='debug_log'):
         verbose_fp.write("\n")
 
     verbose_fp.close()
-    
-record_dir = sys.argv[1]
-nodes_path = f'{record_dir}/nodes.txt'
-node_list = parse_nodes_into_list(nodes_path)
-record_onednn_verbose(node_list,  record_dir)
+
+### Uncomment the below codes and run the command 'python3 ./get_verbose.py ./record' to test.
+# record_dir = sys.argv[1]
+# nodes_path = f'{record_dir}/nodes.txt'
+# node_list = parse_nodes_into_list(nodes_path)
+# record_onednn_verbose(node_list,  record_dir)
