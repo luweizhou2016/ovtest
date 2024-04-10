@@ -87,7 +87,7 @@ idx_perf_in_list = 0
 idx_perc_in_list = 1
 idx_impl_type_in_list = 2
 stream_mark = '####################################################################################################################################################################'
-list_token = '-----------------------------------------------------------------------------------------------------------------------------------------------------------------'
+data_mark = '-----------------------------------------------------------------------------------------------------------------------------------------------------------------'
 ### compare 2 perf file with  'OV_CPU_SUMMARY_PERF = 1'
 ### return a dic of regresssed node [stream_idx:topN_regressed_list]
 def compare_perf(ref_path, target_path):
@@ -147,35 +147,79 @@ def compare_perf(ref_path, target_path):
                                                                         nodes_gain_perc, new_regression_perc, nodes_regression_perc+nodes_gain_perc+new_regression_perc-missing_prec,
                                                                         ref_avg, target_avg, missing_prec))
         print(stream_mark)
-
+### print the regressed node.
         print('TOP {0} REGRESSED NODE LIST:'.format(topN))
+        impl_dic = dict();
         for name, cnt in sorted_regressed_nodes.items():
+            t_type = (target_perf[name])[idx_impl_type_in_list]
+            r_type = (ref_perf[name])[idx_impl_type_in_list]
+            # The regressed count contribution to whole avg cnt
+            perc_in_avg = cnt * 100.0 / ref_avg
+            impl_key= f'{r_type}{"-->"}{t_type}'
+            if impl_key in impl_dic.keys():
+                impl_dic[impl_key] += perc_in_avg
+            else:
+                impl_dic[impl_key] = perc_in_avg
+
             if node_num < topN:
                 t_cnt = (target_perf[name])[idx_perf_in_list]
                 r_cnt = (ref_perf[name])[idx_perf_in_list]
-                t_type = (target_perf[name])[idx_impl_type_in_list]
-                r_type = (ref_perf[name])[idx_impl_type_in_list]
-                perc_in_avg = cnt * 100.0 / ref_avg
                 perc_with_ref = cnt * 100.0 / r_cnt
-                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:>20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
+                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:<20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
                 node_num += 1
                 topN_nodes.append(name)
+        impl_dic = dict(sorted(impl_dic.items(), key=lambda x: x[1], reverse=True))
+        print('*****************************')
+        print('All Regressed by type summary:')
+        for key, val in impl_dic.items():
+            print('{0:<100} : {1:<.2f}%'.format(key, val))
         topN_regression_dic[stream_idx] = topN_nodes
-        print(list_token)
+
+### print the gained node information
+        print(data_mark)
         print('TOP {0} PERF GAIN NODE LIST:'.format(topN))
+        impl_dic.clear()
         node_num = 0
         for name, cnt in sorted_gain_nodes.items():
+            t_type = (target_perf[name])[idx_impl_type_in_list]
+            r_type = (ref_perf[name])[idx_impl_type_in_list]
+            # The regressed count contribution to whole avg cnt
+            perc_in_avg = cnt * 100.0 / ref_avg
+            impl_key= f'{r_type}{"-->"}{t_type}'
+            if impl_key in impl_dic.keys():
+                impl_dic[impl_key] += perc_in_avg
+            else:
+                impl_dic[impl_key] = perc_in_avg
             if node_num < topN:
                 t_cnt = (target_perf[name])[idx_perf_in_list]
                 r_cnt = (ref_perf[name])[idx_perf_in_list]
-                t_type = (target_perf[name])[idx_impl_type_in_list]
-                r_type = (ref_perf[name])[idx_impl_type_in_list]
                 perc_in_avg = cnt * 100.0 / ref_avg
                 perc_with_ref = cnt * 100.0 / r_cnt
 
-                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:>20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
+                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{4:<35} -> {2:>12.0f}us@{5:<35} : {3:<6.2f} % , {6:<20} '.format(perc_in_avg, r_cnt, t_cnt, perc_with_ref,  r_type, t_type, name))
                 node_num += 1
-        print(list_token)
+        impl_dic = dict(sorted(impl_dic.items(), key=lambda x: x[1]))
+        print('*****************************')
+        print('All gain by type summary:')
+        for key, val in impl_dic.items():
+            print('{0:<100} : {1:<.2f}%'.format(key, val))
+        topN_regression_dic[stream_idx] = topN_nodes
+
+### print the missing node information
+        print(data_mark)
+        print('TOP {0} MISSING NODES LIST WITH THRESHOLD_PC > 5 :'.format(topN))
+        node_num = 0
+        for name, cnt in sorted_missing.items():
+            if node_num < topN and cnt > 5 :
+                t_cnt = (ref_perf[name])[idx_perf_in_list]
+                t_type = (ref_perf[name])[idx_impl_type_in_list]
+                perc_in_avg = cnt * 100.0 / ref_avg
+
+                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{2:<35} , {3:<20} '.format(perc_in_avg, t_cnt, t_type, name))
+                node_num += 1
+        print(data_mark)
+### print the new added node information
+        print(data_mark)
         print('TOP {0} NEW NODES LIST WITH THRESHOLD_PC > 5 :'.format(topN))
         node_num = 0
         for name, cnt in sorted_new.items():
@@ -184,9 +228,9 @@ def compare_perf(ref_path, target_path):
                 t_type = (target_perf[name])[idx_impl_type_in_list]
                 perc_in_avg = cnt * 100.0 / ref_avg
 
-                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{2:<35} , {3:>20} '.format(perc_in_avg, t_cnt, t_type, name))
+                print('node_diff/ref_total_latency: {0:<6.2f} % , {1:>12.0f}us @{2:<35} , {3:<20} '.format(perc_in_avg, t_cnt, t_type, name))
                 node_num += 1
-        print(list_token)
+        print(data_mark)
 
     print('\n')
     return topN_regression_dic

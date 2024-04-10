@@ -11,7 +11,7 @@ fi
 # openvino source code root
 ov_src=`realpath $1`
 
-ln -s $ov_src openvino
+ln -sf $ov_src openvino
 
 mkdir -p extern
 
