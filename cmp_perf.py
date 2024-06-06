@@ -61,7 +61,18 @@ def pack_raw_perf_data(in_file, token_list):
 def nodes_perf_in_dic(nodes_data):
     dic = {}
     for line in nodes_data:
-        perc, x, perf, y, node_name, imp_type = line.split()
+        # if (len(line.split()) > 6):
+        #     print('!!!!!!len = {1}, expected 6, skip parsing perf "{0}"'.format(line, str(len(line.split()))))
+        #     # continue
+        split_perf = line.split()
+        perc = split_perf[0]
+        perf = split_perf[2]
+        imp_type = split_perf[-1]
+        if (len(split_perf) > 6):
+            node_name = "".join(split_perf[4:-1])
+        else:
+            node_name = split_perf[4]
+        #perc, x, perf, y, *node_name, imp_type = line.split()
         counter,*x = perf.split('(')
         dic[node_name] = [float(counter), perc, imp_type]
     return dic
@@ -95,8 +106,8 @@ def compare_perf(ref_path, target_path):
     ref_streams_perf = get_perf(ref_path)
 
     if len(targ_streams_perf) != len(ref_streams_perf):
-        print('Error: target streams number is {0} , not equal with refrence streams number {1}'. format(len(targ_streams_perf), len(ref_streams_perf)))
-        exit()
+        print('## target streams number is {0} , not equal with refrence streams number {1}. \n target file: {3}, ref file {2}:'. format(len(targ_streams_perf), len(ref_streams_perf), ref_path, target_path))
+        return dict()
     topN_regression_dic = {}
     # print(len(targ_streams_perf))
     for stream_idx in range(0, len(targ_streams_perf)):

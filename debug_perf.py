@@ -11,7 +11,7 @@ from cmp_perf import *
 from collect_onednn_verbose import *
 
 config_ref = {
-    "bin_folder":"./openvino/bin_master/intel64/Release",
+    "bin_folder":"./openvino/bin_jit/intel64/Release",
     "extra_options":"-infer_precision=f32",
     "extra_cmd":"",
 }
@@ -251,10 +251,14 @@ if __name__ == "__main__":
             print('&&& {0}'.format(xml))
             dic = compare_perf(log_ref, log_targ)
             fp_nodes.write("%s:\n" % xml)
-            for idx,nodes in dic.items():
-                fp_nodes.write("STREAM%d:\n" % idx)
-                for node in nodes:
-                    fp_nodes.write("%s\n" % node)
+            ### Errors happen:
+            if len(dic) == 0:
+                fp_nodes.write("##can't compare perf, error happens, check the file for detials:\n")
+            else:
+                for idx,nodes in dic.items():
+                    fp_nodes.write("STREAM%d:\n" % idx)
+                    for node in nodes:
+                        fp_nodes.write("%s\n" % node)
             fp_nodes.write("\n")
 
         fp_nodes.close()

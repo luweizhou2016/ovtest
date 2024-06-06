@@ -6,6 +6,8 @@ sudo -E apt-get upgrade
 sudo -E apt-get install meld
 sudo -E apt-get install openssh-client
 sudo -E apt-get install git-lfs
+sudo -E apt install nfs-common
+sudo -E apt install linux-tools-$(uname -r)
 echo "----------scp git ssh config----------\n"
 scp luwei@10.67.109.200:~/.gitconfig ~/
 scp luwei@10.67.109.200:~/.ssh/* ~/.ssh/
