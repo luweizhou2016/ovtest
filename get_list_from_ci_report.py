@@ -1,32 +1,49 @@
 import sys
 
-if len(sys.argv) != 4:
+if len(sys.argv) <  2:
     print("Unsupported argument number!")
-    print("get_list.py ci_list.txt full_list.txt INT8/FP32/FP16")
+    print("get_list.py ci_list.txt full_list.txt ")
     sys.exit(0) 
-if (sys.argv[3] != 'INT8' and sys.argv[3] != 'FP16' and sys.argv[3] != 'FP32'):
-    print("unsupported Precision, INT8/FP16/FP32")
-    sys.exit(0) 
+if len(sys.argv) == 4:
+    threshold = float(sys.argv[3])
+else:
+    threshold = float(95.0)
+    
 
 # Using readlines()
-file1 = open(sys.argv[1], 'r')
-Line1s = file1.readlines()
-file2 = open(sys.argv[2], 'r')
-Line2s = file2.readlines()
-outfile = open(sys.argv[3].lower()+'_out_list.txt', 'w')
+ci_file = open(sys.argv[1], 'r')
+ci = ci_file.readlines()
+all_model_file = open(sys.argv[2], 'r')
+all = all_model_file.readlines()
+# all the regressed list
+outfile = open('all_out_list.txt', 'w')
+# regressed list sorted by precision.
+prec_dic = {"INT8" : "int8_out_list.txt", "FP16" : "fp16_out_list.txt", "FP32" : "fp32_out_list.txt"}
+
+file_list = []
+for k, v in prec_dic.items():
+    f = open(v ,'w')
+    file_list.append(list((k, f)))
+
 # Strips the newline character
-for line1 in Line1s:
-    lists = line1.split()
-    if (lists[5] != sys.argv[3]):
+for ci_line in ci:
+    ci_list = ci_line.split()
+    try:
+        gain = float(ci_list[8])
+    except ValueError:
+        print('Cannot convert string to float: '+ ci_line[:-1])
+    if gain >= threshold:
+        print(gain, threshold)
         continue
-    for line2 in Line2s:
-        if (line2.find('/'+ lists[3] + '/' + lists[4].lower()+'/') != -1 and line2.find('/'+lists[5]+'/') != -1):
-            # print('------------------------')
-            # print(lists[3]+'/')
-            # print(lists[4].lower()+'/')
-            # print(lists[5]+'/')
-            # print(line2)
-            outfile.write(line2[:-1]+' ./configs/fp16/i3d-flow-tf.yml\n')
+    for all_line in all:
+        if (all_line.find('/'+ ci_list[3] + '/' + ci_list[4].lower()+'/') != -1 and all_line.find('/'+ci_list[5]+'/1/') != -1):
+            outfile.write(all_line[:-1]+' ./configs/fp16/i3d-flow-tf.yml\n')
+            for item in file_list:
+                if ci_list[5] == item[0]:
+                    item[1].write(all_line[:-1]+' ./configs/fp16/i3d-flow-tf.yml\n')
+
+for item in file_list:
+    item[1].close()
 outfile.close()
-file2.close()
-file1.close()
+all_model_file.close()
+ci_file.close()

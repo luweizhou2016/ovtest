@@ -37,7 +37,10 @@ def parse_nodes_into_list(node_file, stream_name='STREAM0'):
 def record_onednn_verbose(nodes_list, dbg_dir ='debug_log'):
     for model, nodes_verbose in nodes_list:
         *x, ir = model.split('/')
-        name,*x = ir.split('.')
+        name,*y = ir.split('.')
+        prec = "INT8" if x[-1] == "optimized" else x[-3]
+        frame = x[-6] if x[-1] == "optimized" else x[-4]
+        name = name + '_' + frame + '_' + prec
         paths = [f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_verbose_"}{name}{".txt"}' ,
                     f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"targ_verbose_"}{name}{".txt"}']
         for file_path in paths:

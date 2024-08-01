@@ -11,13 +11,13 @@ from cmp_perf import *
 from collect_onednn_verbose import *
 
 config_ref = {
-    "bin_folder":"./openvino/bin_jit/intel64/Release",
+    "bin_folder":"./openvino/bin_master/intel64/Release",
     "extra_options":"-infer_precision=f32",
     "extra_cmd":"",
 }
 
 config_tag = {
-    "bin_folder":"./openvino/bin_brg/intel64/Release",
+    "bin_folder":"./openvino/bin_3.5/intel64/Release",
     "extra_options":"-infer_precision=f32",
     "extra_cmd":"",
 }
@@ -29,7 +29,10 @@ def get_cmd(cfg, model_path, args):
     extra_cmd = cfg['extra_cmd']
     extra_options = cfg['extra_options']
     *x, ir = model_path.split('/')
-    name,*x = ir.split('.')
+    name,*y = ir.split('.')
+    prec = "INT8" if x[-1] == "optimized" else x[-3]
+    frame = x[-6] if x[-1] == "optimized" else x[-4]
+    name = name + '_' + frame + '_' + prec
     log_file = ''
     is_ref = True
     is_perf = True
@@ -101,7 +104,10 @@ class compare_info:
         self.latavg = (i1.latavg/i0.latavg)
         self.load = (i1.load/i0.load)
         self.rss = (i1.rss/i0.rss)
-        self.cpu = (i1.cpu/i0.cpu)
+        if i0.cpu == 0.0:
+            self.cpu = 1.0
+        else:
+            self.cpu = (i1.cpu/i0.cpu)
         self.pagefaults = (i1.pagefaults/i0.pagefaults)
 
 if __name__ == "__main__":
@@ -245,7 +251,10 @@ if __name__ == "__main__":
 
         for i, (xml, _) in enumerate(models):
             *x, ir = xml.split('/')
-            name,*x = ir.split('.')
+            name,*y = ir.split('.')
+            prec = "INT8" if x[-1] == "optimized" else x[-3]
+            frame = x[-6] if x[-1] == "optimized" else x[-4]
+            name = name + '_' + frame + '_' + prec
             log_ref = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"ref_"}{"perf_"}{name}{".txt"}'
             log_targ = f'{os.getcwd()}{"/"}{dbg_dir}{"/"}{"targ_"}{"perf_"}{name}{".txt"}'
             print('&&& {0}'.format(xml))
