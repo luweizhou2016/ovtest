@@ -28,12 +28,13 @@ for k, v in prec_dic.items():
 # Strips the newline character
 for ci_line in ci:
     ci_list = ci_line.split()
+    # print(ci_list)
     try:
         gain = float(ci_list[8])
     except ValueError:
         print('Cannot convert string to float: '+ ci_line[:-1])
+        continue
     if gain >= threshold:
-        print(gain, threshold)
         continue
     for all_line in all:
         if (all_line.find('/'+ ci_list[3] + '/' + ci_list[4].lower()+'/') != -1 and all_line.find('/'+ci_list[5]+'/1/') != -1):
