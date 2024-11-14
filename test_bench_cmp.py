@@ -8,21 +8,25 @@ import colorama
 from colorama import Fore
 
 config_ref = {
-    "bin_folder":"./openvino/bin_brg/intel64/Release",
+    "bin_folder":"./openvino/bin_jit_legacy_zp/intel64/Release",
     "extra_options":"-infer_precision=f32",
     "extra_cmd":"",
 }
 
 config_tag = {
-    "bin_folder":"./openvino/bin_brg_fix/intel64/Release",
+    "bin_folder":"./openvino/bin_brg_stockzp/intel64/Release",
     "extra_options":"-infer_precision=f32",
     "extra_cmd":"",
 }
 
-def get_cmd(cfg, model_path, args):
+def get_cmd(cfg, model_path, args, file_path = None):
     bin_folder = cfg['bin_folder']
     extra_cmd = cfg['extra_cmd']
     extra_options = cfg['extra_options']
+    if bin_folder == config_ref['bin_folder']:
+        is_ref = True
+    else:
+        is_ref = False
     if len(extra_cmd) == 0:
         extra_cmd = "echo"
     if args.tput:
@@ -81,14 +85,18 @@ if __name__ == "__main__":
     
     parser.add_argument("--tput", action="store_true", help="use hint=tput instead of (1stream + 4threads)")
     parser.add_argument("--latency", action="store_true", help="use hint=latency instead of (1stream + 4threads)")
+    parser.add_argument("--onednnverbose", action="store_true", help="enable ONEDNN_VERBOSE= 1")
+
     parser.add_argument("--model_list", type=str, default="int8_models/ww06_list.txt")
     parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument('-o',"--output_dir", type=str, help="Folder of onednn verbose", default="verbose_out")
+
     args = parser.parse_args()
-    # os.environ["ONEDNN_MAX_CPU_ISA"]="AVX512_CORE"
     # os.environ["ONEDNN_VERBOSE"]="1"
     ##os.environ["OV_CPU_DEBUG_LOG"]="-"
-    os.environ["OV_CPU_SUMMARY_PERF"]="1"
-
+    # os.environ["OV_CPU_SUMMARY_PERF"]="1"
+    if args.onednnverbose:
+        os.environ["ONEDNN_VERBOSE"]="1"
     print(f"searching for xml models in {args.model_list}...")
     models = utils.get_models_xmlyml_from_list(args.model_list, args.name_filter)
     comm_prefix = utils.get_common_prefix([xml for xml,_ in models])
@@ -101,13 +109,33 @@ if __name__ == "__main__":
     geomean_latavg = 1.0
 
     log_ref = ""
+    out_dir = args.output_dir
+    isExist = os.path.exists(out_dir)
+    if not isExist:
+        os.makedirs(out_dir)
     def do_test(cfg, mpath, args):
         ret = None
         error_happens = False
+        log_list = []
+        perf_best = 0
+        best_perf_log_path=""
+        if args.onednnverbose:
+            if cfg['bin_folder'] == config_ref['bin_folder']:
+                is_ref = True
+            else:
+                is_ref = False
+            *x, ir = mpath.split('/')
+            name,*x = ir.split('.')
+            best_perf_log_path =  f'{os.getcwd()}{"/"}{out_dir}{"/"}{"ref_" if is_ref else "targ_"}{"verbose_"}{name}{".txt"}'
         for i in range(args.repeat):
             log_ref = ""
             try:
                 cmdline = get_cmd(cfg, mpath, args)
+                ## append the tee command to output into log.
+                if args.onednnverbose:
+                    tmp_log_file = f'{best_perf_log_path}{".tmp"}{i}'
+                    cmdline = f'{cmdline} {" | tee "} {tmp_log_file}'
+                    log_list.append(tmp_log_file)
                 if args.verbose:
                     print(cmdline)
                 log_ref = subprocess.check_output(cmdline, shell=True, stderr=subprocess.STDOUT, encoding="utf-8")
@@ -122,8 +150,18 @@ if __name__ == "__main__":
             print(f"\t{i0}")
             if not ret:
                 ret = i0
-            elif (i0.tput > ret.tput):
+                perf_best=i
+            elif (i0.tput > ret.tput and args.tput) or (i0.latavg < ret.latavg and args.latency):
                 ret = i0
+                perf_best=i
+
+        if args.onednnverbose:
+            os.rename(log_list[perf_best], best_perf_log_path)
+            for path in log_list:
+                if os.path.exists(path):
+                    os.remove(path)
+            # log = f'{"#########best:"}{perf_best}{", file:"}{log_list[perf_best]}'
+            # print(log)
         return ret
 
     for i, (xml, _) in enumerate(models):
@@ -167,8 +205,6 @@ if __name__ == "__main__":
         s = get_text(colored_ratio, args)
         print(s)
         models_list.append([s, cmp])
-
-
     print("====================================================\n")
     print(f"models in folder: {comm_prefix}")
     def getTput(item):
